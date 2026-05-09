@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Course access hub prototype with module-first navigation. Three course types: Anatomy, Physiology, Anatomy and Physiology.">
+<meta name="theme-color" content="#0A1322">
+<title>Course Access Prototype · MedMasters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFFFFF;
+  --bg-page: #F4F5F8;
+  --bg-tint: #F7F8FA;
+  --navy: #0A1322;
+  --navy-mid: #1F2D44;
+  --gold: #D4A24C;
+  --gold-text: #6E5018;
+  --gold-bright: #E5B45C;
+  --terra: #C25A3E;
+  --terra-text: #7A2F18;
+  --terra-bright: #E59575;
+  --teal-text: #2C5F66;
+  --teal-bright: #5B9AA0;
+  --plum-text: #5C2A66;
+  --slate-text: #334155;
+  --admin-text: #2C3E50;
+  --ink: #0A1322;
+  --ink-soft: #14202F;
+  --ink-muted: #3D4860;
+  --rule: #B8BEC8;
+  --rule-soft: #DCE0E6;
+  --rule-faint: #E8EBEF;
+  --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --reading: 'Atkinson Hyperlegible', 'Plus Jakarta Sans', sans-serif;
+  --mono: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --shadow-card: 0 1px 3px rgba(10,19,34,0.08), 0 1px 2px rgba(10,19,34,0.05);
+  --shadow-lift: 0 6px 16px rgba(10,19,34,0.10), 0 3px 6px rgba(10,19,34,0.06);
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { background: var(--bg-page); overflow-x: hidden; }
+body {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+  min-height: 100vh;
+}
+
+em { font-style: normal; font-weight: 700; }
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--gold-text);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px; left: 8px; z-index: 9999;
+  background: var(--navy); color: white;
+  font-family: var(--sans); font-weight: 600; font-size: 14px;
+  padding: 12px 18px; text-decoration: none;
+  border: 3px solid var(--gold-text);
+}
+.skip-link:focus { top: 8px; outline: none; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important; height: 1px !important;
+  padding: 0 !important; margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============ APP SHELL ============ */
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 40px 96px;
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 22px; border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 36px; flex-wrap: wrap; gap: 16px;
+}
+.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand-mark {
+  font-family: var(--sans); font-weight: 500; font-size: 28px;
+  letter-spacing: -0.025em; line-height: 1; color: var(--navy);
+}
+.brand-mark em { color: var(--terra-text); }
+.brand-tag {
+  font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--ink-muted);
+}
+.proto-pill {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  background: var(--terra-text); color: white;
+  padding: 5px 12px; border-radius: 999px;
+}
+
+/* ============ COURSE TABS ============ */
+.course-tabs {
+  display: flex; gap: 0; margin-bottom: 28px; flex-wrap: wrap;
+}
+.course-tab {
+  font-family: var(--sans); font-size: 14.5px; font-weight: 500;
+  background: white; border: 1px solid var(--rule-soft); border-right-width: 0;
+  color: var(--ink-soft); padding: 12px 20px; cursor: pointer;
+  transition: all 0.18s var(--ease);
+  display: flex; align-items: center; gap: 10px;
+}
+.course-tab:last-of-type { border-right-width: 1px; }
+.course-tab:hover { background: var(--bg-tint); color: var(--navy); }
+.course-tab.active {
+  background: var(--navy); color: white; border-color: var(--navy); font-weight: 600;
+}
+.course-tab-code {
+  font-family: var(--mono); font-size: 12.5px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.course-tab.active .course-tab-code {
+  color: var(--gold-bright);
+}
+
+/* ============ HERO (Hub view) ============ */
+.hero {
+  padding: 24px 0 36px; border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 32px;
+}
+.hero-pills {
+  display: flex; gap: 10px; margin-bottom: 18px;
+  flex-wrap: wrap; align-items: center;
+}
+.hero-type-pill {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: white; padding: 5px 14px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.hero-type-pill[data-type="anatomy"]    { background: var(--terra-text); }
+.hero-type-pill[data-type="physiology"] { background: var(--teal-text); }
+.hero-type-pill[data-type="ap"]         { background: var(--navy); }
+.hero-type-pill[data-type="ap"]::before {
+  content: '';
+  display: inline-block;
+  width: 9px; height: 9px;
+  background: linear-gradient(135deg, var(--terra-bright) 50%, var(--teal-bright) 50%);
+  border-radius: 999px;
+}
+.hero-meta {
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.hero-title {
+  font-family: var(--sans); font-weight: 700;
+  font-size: clamp(36px, 5.6vw, 60px);
+  letter-spacing: -0.022em; line-height: 1.05;
+  color: var(--navy); margin-bottom: 18px;
+}
+.hero-title em { color: var(--terra-text); }
+.hero-subtitle {
+  font-family: var(--reading);
+  font-size: clamp(17px, 1.6vw, 19px);
+  color: var(--ink-soft); max-width: 64ch; line-height: 1.55;
+}
+
+/* ============ COURSE TOOLKIT ============ */
+.toolkit { margin-bottom: 56px; }
+.toolkit-head {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 22px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule-soft);
+  flex-wrap: wrap;
+}
+.toolkit-head-title {
+  font-family: var(--sans); font-weight: 700;
+  font-size: 22px; color: var(--navy);
+  letter-spacing: -0.005em;
+}
+.toolkit-head-sub {
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.toolkit-shutter-list { display: flex; flex-direction: column; gap: 8px; }
+
+.toolkit-shutter {
+  background: white;
+  border: 1px solid var(--rule-soft);
+  overflow: hidden;
+  transition: box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.toolkit-shutter:hover { border-color: var(--rule); }
+.toolkit-shutter[data-open="true"] {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-card);
+}
+
+.toolkit-shutter-trigger {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  gap: 14px; align-items: center;
+  background: white; border: none;
+  padding: 14px 18px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  transition: background 0.2s var(--ease);
+}
+.toolkit-shutter-trigger:hover { background: var(--bg-tint); }
+.toolkit-shutter[data-open="true"] .toolkit-shutter-trigger {
+  background: var(--navy); color: white;
+}
+
+.toolkit-shutter .louvers {
+  width: 24px; height: 24px;
+}
+.toolkit-shutter .louver { height: 3px; }
+
+.toolkit-shutter-name-block { min-width: 0; }
+.toolkit-shutter-name {
+  font-family: var(--sans); font-weight: 700;
+  font-size: 16px; letter-spacing: -0.005em;
+  color: var(--ink); line-height: 1.25; margin-bottom: 2px;
+}
+.toolkit-shutter[data-open="true"] .toolkit-shutter-name { color: white; }
+.toolkit-shutter-sub {
+  font-family: var(--sans); font-size: 12.5px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.toolkit-shutter[data-open="true"] .toolkit-shutter-sub { color: var(--gold-bright); }
+
+.toolkit-shutter-count {
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  color: var(--ink-muted); font-feature-settings: 'tnum';
+  white-space: nowrap;
+}
+.toolkit-shutter[data-open="true"] .toolkit-shutter-count { color: var(--gold-bright); }
+
+.toolkit-chevron {
+  width: 16px; height: 16px;
+  transition: transform 0.3s var(--ease);
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+.toolkit-shutter[data-open="true"] .toolkit-chevron {
+  transform: rotate(180deg);
+  color: white;
+}
+
+.toolkit-shutter-body {
+  display: none;
+  padding: 18px;
+  background: white;
+  border-top: 1px solid var(--rule-faint);
+}
+.toolkit-shutter[data-open="true"] .toolkit-shutter-body { display: block; }
+
+.toolkit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.toolkit-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid var(--rule-faint);
+  text-decoration: none; color: var(--ink);
+  transition: all 0.18s var(--ease);
+}
+.toolkit-card:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+.toolkit-card-tag-row {
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+}
+.toolkit-card-title {
+  font-family: var(--sans); font-weight: 700; font-size: 15.5px;
+  letter-spacing: -0.005em; line-height: 1.3;
+}
+.toolkit-card-desc {
+  font-family: var(--sans); font-size: 13px; color: var(--ink-soft);
+  line-height: 1.45;
+}
+.toolkit-card-meta {
+  font-family: var(--mono); font-size: 11.5px;
+  color: var(--ink-muted); margin-top: auto;
+  padding-top: 4px;
+  font-feature-settings: 'tnum';
+}
+
+/* ============ MODULE PICKER (Hub view) ============ */
+.picker-section { margin-bottom: 24px; }
+.picker-head {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 22px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule-soft);
+  flex-wrap: wrap;
+}
+.picker-head-title {
+  font-family: var(--sans); font-weight: 700;
+  font-size: 22px; color: var(--navy);
+  letter-spacing: -0.005em;
+}
+.picker-head-sub {
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.picker-card {
+  display: flex; flex-direction: column;
+  padding: 22px 22px 18px;
+  background: white;
+  border: 1px solid var(--rule-soft);
+  text-decoration: none; color: var(--ink);
+  transition: all 0.2s var(--ease);
+  position: relative;
+  cursor: pointer;
+  text-align: left;
+}
+.picker-card:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-2px);
+}
+.picker-card-num-row {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 14px;
+}
+.picker-card-num {
+  font-family: var(--mono); font-weight: 700; font-size: 32px;
+  color: var(--gold-text); font-feature-settings: 'tnum';
+  line-height: 1; letter-spacing: -0.01em;
+}
+.picker-card-meta {
+  font-family: var(--mono); font-size: 11.5px;
+  color: var(--ink-muted);
+  margin-left: auto;
+  font-feature-settings: 'tnum';
+}
+.picker-card-title {
+  font-family: var(--sans); font-weight: 700; font-size: 19px;
+  letter-spacing: -0.01em; line-height: 1.25;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+.picker-card-desc {
+  font-family: var(--reading); font-size: 14.5px;
+  color: var(--ink-soft); line-height: 1.5;
+  margin-bottom: 14px;
+}
+.picker-card-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 12px; border-top: 1px solid var(--rule-faint);
+  margin-top: auto;
+}
+.picker-card-count {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--ink-muted);
+}
+.picker-card-arrow {
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  color: var(--terra-text);
+  transition: transform 0.2s var(--ease), gap 0.2s var(--ease);
+  display: flex; align-items: center; gap: 6px;
+}
+.picker-card:hover .picker-card-arrow {
+  color: var(--navy); gap: 10px;
+}
+
+/* ============ MODULE VIEW HEADER ============ */
+.module-view-head { margin-bottom: 28px; }
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 500;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.breadcrumb a, .breadcrumb button {
+  color: var(--ink-muted);
+  text-decoration: none;
+  background: transparent; border: none; padding: 0;
+  font: inherit; cursor: pointer;
+  transition: color 0.16s var(--ease);
+}
+.breadcrumb a:hover, .breadcrumb button:hover {
+  color: var(--terra-text);
+  text-decoration: underline;
+}
+.breadcrumb-sep { color: var(--rule); }
+.breadcrumb-current { color: var(--navy); font-weight: 600; }
+
+.module-hero {
+  padding: 8px 0 32px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.module-hero-num-row {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.module-hero-num {
+  font-family: var(--mono); font-weight: 700;
+  font-size: 26px; color: var(--gold-text);
+  font-feature-settings: 'tnum'; line-height: 1;
+}
+.module-hero-meta {
+  font-family: var(--mono); font-size: 12.5px; font-weight: 500;
+  color: var(--ink-muted);
+  margin-left: auto;
+}
+.module-hero-title {
+  font-family: var(--sans); font-weight: 700;
+  font-size: clamp(28px, 4vw, 42px);
+  letter-spacing: -0.018em; line-height: 1.1;
+  color: var(--navy); margin-bottom: 14px;
+}
+.module-hero-desc {
+  font-family: var(--reading);
+  font-size: 17px; color: var(--ink-soft);
+  line-height: 1.55; max-width: 64ch;
+}
+
+/* ============ CONTROLS ============ */
+.controls {
+  display: grid; grid-template-columns: 1fr; gap: 22px;
+  padding: 22px;
+  background: var(--bg-tint);
+  border: 1px solid var(--rule-faint);
+  margin: 28px 0;
+}
+@media (min-width: 760px) {
+  .controls.has-1 { grid-template-columns: 1fr; }
+  .controls.has-2 { grid-template-columns: 1fr 1fr; }
+}
+.control-group { display: flex; flex-direction: column; gap: 10px; }
+.control-label {
+  font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-muted);
+}
+.chip-row { display: flex; flex-wrap: wrap; gap: 0; }
+.chip {
+  font-family: var(--mono); font-size: 12.5px; font-weight: 500;
+  background: white; border: 1px solid var(--rule-soft); border-right-width: 0;
+  color: var(--ink-soft); padding: 9px 14px; cursor: pointer;
+  transition: all 0.16s var(--ease); white-space: nowrap;
+}
+.chip:last-child { border-right-width: 1px; }
+.chip:hover { background: var(--bg-tint); color: var(--navy); }
+.chip[aria-pressed="true"] {
+  background: var(--navy); color: white; border-color: var(--navy); font-weight: 500;
+}
+.chip[aria-pressed="true"] + .chip { border-left-color: var(--navy); }
+
+/* ============ AP LEGEND ============ */
+.legend {
+  display: flex; gap: 16px; align-items: center;
+  margin: 0 0 28px 0;
+  padding: 12px 18px;
+  background: var(--bg-tint);
+  border-left: 3px solid var(--navy);
+  flex-wrap: wrap;
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft);
+}
+.legend-label { font-weight: 600; color: var(--navy); }
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-tag {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+  color: white; padding: 3px 9px; border-radius: 999px;
+}
+.legend-tag.tag-anat { background: var(--terra-text); }
+.legend-tag.tag-phys { background: var(--teal-text); }
+
+/* ============ MODULE TOOLS STRIP ============ */
+.module-tools {
+  margin-bottom: 28px;
+}
+.module-tools-head {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-faint);
+  flex-wrap: wrap;
+}
+.module-tools-title {
+  font-family: var(--sans); font-weight: 700; font-size: 16px;
+  color: var(--navy);
+}
+.module-tools-sub {
+  font-family: var(--sans); font-size: 12.5px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.module-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.module-tool {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid var(--rule-faint);
+  text-decoration: none; color: var(--ink);
+  transition: all 0.16s var(--ease);
+}
+.module-tool:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+.module-tool-tag-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.module-tool-title {
+  font-family: var(--sans); font-size: 14px;
+  font-weight: 600; line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+.module-tool-meta {
+  font-family: var(--mono); font-size: 11.5px;
+  color: var(--ink-muted);
+  font-feature-settings: 'tnum';
+}
+
+/* ============ TOPICS HEADER ============ */
+.topics-head {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule-soft);
+  flex-wrap: wrap;
+}
+.topics-head-title {
+  font-family: var(--sans); font-weight: 700; font-size: 18px;
+  color: var(--navy); letter-spacing: -0.005em;
+}
+.topics-head-sub {
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  color: var(--ink-muted);
+}
+
+/* ============ SHUTTER ============ */
+.shutter-list { display: flex; flex-direction: column; gap: 10px; }
+
+.shutter {
+  background: white;
+  border: 1px solid var(--rule-soft);
+  overflow: hidden;
+  transition: box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.shutter:hover { border-color: var(--rule); }
+.shutter[data-open="true"] {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-lift);
+}
+
+.shutter-trigger-row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 16px; align-items: center;
+  background: white;
+  padding: 16px 22px;
+  transition: background 0.2s var(--ease);
+}
+.shutter[data-open="true"] .shutter-trigger-row {
+  background: var(--navy); color: white;
+}
+
+.louvers {
+  width: 28px; height: 28px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 4px 2px;
+  border: 1.5px solid var(--ink-muted);
+  background: var(--bg-tint);
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+  flex-shrink: 0;
+}
+.shutter[data-open="true"] .louvers,
+.toolkit-shutter[data-open="true"] .louvers {
+  border-color: white; background: var(--navy-mid);
+}
+.louver {
+  height: 4px; background: var(--ink-muted);
+  transform-origin: center;
+  transition: transform 0.4s var(--ease), background 0.2s var(--ease);
+}
+.shutter[data-open="true"] .louver,
+.toolkit-shutter[data-open="true"] .louver { background: var(--gold-bright); }
+.shutter[data-open="true"] .louver:nth-child(1),
+.toolkit-shutter[data-open="true"] .louver:nth-child(1) { transform: rotateX(72deg); }
+.shutter[data-open="true"] .louver:nth-child(2),
+.toolkit-shutter[data-open="true"] .louver:nth-child(2) { transform: rotateX(72deg); transition-delay: 0.05s; }
+.shutter[data-open="true"] .louver:nth-child(3),
+.toolkit-shutter[data-open="true"] .louver:nth-child(3) { transform: rotateX(72deg); transition-delay: 0.10s; }
+
+.shutter-title-block { min-width: 0; }
+.shutter-title {
+  font-family: var(--sans); font-weight: 700;
+  font-size: 17.5px; letter-spacing: -0.005em;
+  color: var(--ink); line-height: 1.25; margin-bottom: 3px;
+}
+.shutter[data-open="true"] .shutter-title { color: white; }
+.shutter-sub {
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  color: var(--ink-muted);
+}
+.shutter[data-open="true"] .shutter-sub { color: var(--gold-bright); }
+
+/* ============ R/H/O/A CIRCLE TRIGGERS ============ */
+.shutter-circles {
+  display: flex; gap: 8px;
+  flex-shrink: 0;
+}
+.circle-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: var(--sans);
+  color: white;
+  padding: 0;
+  transition: all 0.18s var(--ease);
+  position: relative;
+  flex-shrink: 0;
+}
+.circle-btn[data-circle="required"]    { background: var(--terra-text); }
+.circle-btn[data-circle="recommended"] { background: var(--gold-text); }
+.circle-btn[data-circle="optional"]    { background: var(--navy-mid); }
+.circle-btn[data-circle="refresher"]   { background: var(--teal-text); }
+
+.circle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.circle-btn[aria-pressed="true"] {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 0 3px white, 0 0 0 5px var(--gold-bright), var(--shadow-card);
+}
+.shutter[data-open="true"] .circle-btn[aria-pressed="true"] {
+  box-shadow: 0 0 0 3px var(--navy), 0 0 0 5px var(--gold-bright), var(--shadow-card);
+}
+
+.circle-letter {
+  font-size: 17px; font-weight: 700;
+  line-height: 1;
+}
+.circle-count {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  margin-top: 2px; opacity: 0.85;
+  font-feature-settings: 'tnum';
+  line-height: 1;
+}
+
+/* ============ SHUTTER BODY (single column) ============ */
+.shutter-body {
+  display: none;
+  padding: 26px 24px 28px;
+  background: white;
+  border-top: 1px solid var(--rule-faint);
+}
+.shutter[data-open="true"] .shutter-body { display: block; }
+
+.section-region {
+  padding-left: 16px;
+  border-left: 4px solid var(--rule-soft);
+}
+.section-region.region-required    { border-left-color: var(--terra-text); }
+.section-region.region-recommended { border-left-color: var(--gold-text); }
+.section-region.region-optional    { border-left-color: var(--navy-mid); }
+.section-region.region-refresher   { border-left-color: var(--teal-text); }
+
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; padding-bottom: 12px; margin-bottom: 14px;
+  border-bottom: 1px solid var(--rule-faint);
+  flex-wrap: wrap;
+}
+.section-name {
+  font-family: var(--sans); font-size: 18px; font-weight: 700;
+  letter-spacing: -0.005em; line-height: 1.2;
+}
+.section-region.region-required    .section-name { color: var(--terra-text); }
+.section-region.region-recommended .section-name { color: var(--gold-text); }
+.section-region.region-optional    .section-name { color: var(--navy); }
+.section-region.region-refresher   .section-name { color: var(--teal-text); }
+
+.section-helper {
+  font-family: var(--reading); font-size: 14px;
+  color: var(--ink-soft); font-style: italic;
+  margin-left: auto;
+}
+
+.section-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.section-empty {
+  font-family: var(--reading); font-size: 14px;
+  color: var(--ink-muted); font-style: italic;
+  padding: 16px 0;
+}
+
+/* ============ RESOURCE CARD ============ */
+.res {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid var(--rule-faint);
+  text-decoration: none; color: var(--ink);
+  transition: all 0.18s var(--ease);
+}
+.res:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+.res-tag-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+.res-tag {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+  color: white; padding: 3px 9px; border-radius: 999px;
+  font-feature-settings: 'tnum';
+}
+.res-tag.tag-reading,
+.res-tag.tag-video,
+.res-tag.tag-notes,
+.res-tag.tag-atlas,
+.res-tag.tag-tool,
+.res-tag.tag-worksheet,
+.res-tag.tag-quiz,
+.res-tag.tag-practice {
+  background: var(--ink-muted);
+}
+.res-tag.tag-lab        { background: var(--terra-text); }
+.res-tag.tag-case       { background: var(--teal-text); }
+.res-tag.tag-aitool     { background: var(--gold-text); }
+.res-tag.tag-kahoot     { background: var(--plum-text); }
+.res-tag.tag-assignment { background: var(--slate-text); }
+.res-tag.tag-admin      { background: var(--admin-text); }
+.res-tag.tag-anat       { background: var(--terra-text); }
+.res-tag.tag-phys       { background: var(--teal-text); }
+
+.dok-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--navy);
+  padding: 2px 8px;
+  border: 1px solid var(--navy);
+  border-radius: 999px;
+  background: white;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'tnum';
+}
+
+.res-title {
+  font-family: var(--sans); font-weight: 600; font-size: 14.5px;
+  line-height: 1.35; letter-spacing: -0.005em;
+}
+.res-meta {
+  font-family: var(--mono); font-size: 11.5px;
+  color: var(--ink-muted); font-feature-settings: 'tnum';
+}
+.res-arrow {
+  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
+  color: var(--terra-text); margin-top: 2px;
+}
+.res:hover .res-arrow { color: var(--navy); }
+
+/* ============ CIRCLE LEGEND ============ */
+.circle-legend {
+  display: flex; gap: 18px; align-items: center;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: var(--bg-tint);
+  border-left: 3px solid var(--gold-text);
+  margin-bottom: 18px;
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft);
+}
+.circle-legend-label { font-weight: 600; color: var(--navy); }
+.circle-legend-item {
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.circle-legend-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--sans); font-weight: 700; font-size: 11px;
+  color: white;
+  flex-shrink: 0;
+}
+.circle-legend-dot[data-circle="required"]    { background: var(--terra-text); }
+.circle-legend-dot[data-circle="recommended"] { background: var(--gold-text); }
+.circle-legend-dot[data-circle="optional"]    { background: var(--navy-mid); }
+.circle-legend-dot[data-circle="refresher"]   { background: var(--teal-text); }
+
+/* ============ FOOTER NOTE ============ */
+.footer-note {
+  margin-top: 56px; padding: 22px;
+  background: var(--navy); color: white;
+  font-family: var(--reading); font-size: 14px; line-height: 1.65;
+}
+.footer-note h3 {
+  font-family: var(--sans); font-weight: 700; color: var(--gold-bright);
+  font-size: 14px; margin-bottom: 10px;
+}
+.footer-note .ftn-row { margin-bottom: 6px; }
+.footer-note .ftn-row:last-child { margin-bottom: 0; }
+.footer-note strong { font-family: var(--sans); font-weight: 700; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 720px) {
+  .app { padding: 22px 22px 64px; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .shutter-trigger-row { grid-template-columns: 28px 1fr; padding: 14px 16px; gap: 12px; }
+  .shutter-circles {
+    grid-column: 2;
+    margin-top: 10px;
+    justify-content: flex-start;
+  }
+  .module-hero-meta { width: 100%; margin-left: 0; }
+  .course-tab { padding: 10px 14px; font-size: 13.5px; }
+  .picker-grid { grid-template-columns: 1fr; }
+  .toolkit-grid { grid-template-columns: 1fr; }
+  .circle-btn { width: 42px; height: 42px; }
+  .circle-letter { font-size: 15px; }
+}
+
+/* ============ VIEW VISIBILITY ============ */
+.view { display: none; }
+.view.active { display: block; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">Course<em>Hub</em></span>
+      <span class="brand-tag">Dr. Sharilyn Rennie</span>
+    </div>
+    <span class="proto-pill" aria-label="Prototype version">Prototype v0.4</span>
+  </header>
+
+  <nav class="course-tabs" aria-label="Select a course">
+    <button class="course-tab active" data-course="anatomy" aria-pressed="true">
+      Anatomy <span class="course-tab-code">BIO 004</span>
+    </button>
+    <button class="course-tab" data-course="ap" aria-pressed="false">
+      Anatomy &amp; Physiology <span class="course-tab-code">BIO 431</span>
+    </button>
+    <button class="course-tab" data-course="physiology" aria-pressed="false">
+      Physiology <span class="course-tab-code">BIO 005</span>
+    </button>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <!-- ============ HUB VIEW ============ -->
+    <div class="view active" id="view-hub">
+      <section class="hero">
+        <div class="hero-pills">
+          <span class="hero-type-pill" id="hero-type" data-type="anatomy">Anatomy course</span>
+          <span class="hero-meta" id="hero-meta">BIO 004 · Summer 2026</span>
+        </div>
+        <h1 class="hero-title" id="hero-title">Human <em>Anatomy</em></h1>
+        <p class="hero-subtitle" id="hero-sub">Eight modules. One body. Pick a module to dive into its topics.</p>
+      </section>
+
+      <div id="toolkit-host"></div>
+
+      <section class="picker-section" aria-labelledby="picker-title">
+        <header class="picker-head">
+          <h2 class="picker-head-title" id="picker-title">Modules</h2>
+          <span class="picker-head-sub" id="picker-sub">Choose a module to see its topics and resources</span>
+        </header>
+        <div class="picker-grid" id="picker-grid"></div>
+      </section>
+    </div>
+
+    <!-- ============ MODULE VIEW ============ -->
+    <div class="view" id="view-module">
+      <div class="module-view-head">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <button type="button" id="breadcrumb-back">Back to all modules</button>
+          <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="breadcrumb-current" id="breadcrumb-current">Module</span>
+        </nav>
+
+        <header class="module-hero">
+          <div class="module-hero-num-row">
+            <span class="module-hero-num" id="mod-hero-num">01</span>
+            <span class="module-hero-meta" id="mod-hero-meta"></span>
+          </div>
+          <h1 class="module-hero-title" id="mod-hero-title">Module Title</h1>
+          <p class="module-hero-desc" id="mod-hero-desc"></p>
+        </header>
+      </div>
+
+      <div class="controls" id="controls"></div>
+      <div id="legend-host"></div>
+
+      <div id="module-tools-host"></div>
+
+      <section aria-labelledby="topics-title">
+        <header class="topics-head">
+          <h2 class="topics-head-title" id="topics-title">Topics in this module</h2>
+          <span class="topics-head-sub">Click any colored circle to see those resources</span>
+        </header>
+
+        <div class="circle-legend" role="note" aria-label="Circle key">
+          <span class="circle-legend-label">What the circles mean:</span>
+          <span class="circle-legend-item">
+            <span class="circle-legend-dot" data-circle="required" aria-hidden="true">R</span>
+            Required
+          </span>
+          <span class="circle-legend-item">
+            <span class="circle-legend-dot" data-circle="recommended" aria-hidden="true">H</span>
+            Highly recommended
+          </span>
+          <span class="circle-legend-item">
+            <span class="circle-legend-dot" data-circle="optional" aria-hidden="true">O</span>
+            Optional
+          </span>
+          <span class="circle-legend-item" id="circle-legend-refresher" hidden>
+            <span class="circle-legend-dot" data-circle="refresher" aria-hidden="true">A</span>
+            Anatomy refresher
+          </span>
+        </div>
+
+        <div class="shutter-list" id="topics-list"></div>
+      </section>
+    </div>
+
+    <div class="footer-note">
+      <h3>How navigation works</h3>
+      <div class="ftn-row"><strong>Step 1.</strong> Pick your course at the top (Anatomy, A&amp;P, Physiology).</div>
+      <div class="ftn-row"><strong>Step 2.</strong> The hub page shows the course toolkit (admin, study tools, practice, projects) and a grid of modules. Click a module.</div>
+      <div class="ftn-row"><strong>Step 3.</strong> The module page shows its topics. Each topic has colored circles: R (required), H (highly recommended), O (optional), and A (anatomy refresher, Physiology only). Click a circle to see those resources for that topic.</div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ============================================
+// TYPE LABELS & TAG CLASSES
+// ============================================
+const TYPE_LABELS = {
+  reading: 'Reading', video: 'Video', lab: 'Lab', tool: 'Tool',
+  aitool: 'AI Tool', practice: 'Practice', case: 'Case',
+  atlas: 'Atlas', quiz: 'Quiz', notes: 'Notes',
+  worksheet: 'Worksheet', kahoot: 'Kahoot',
+  assignment: 'Assignment', admin: 'Admin'
+};
+const TYPE_TAG_CLASS = {
+  reading: 'tag-reading', video: 'tag-video', lab: 'tag-lab', tool: 'tag-tool',
+  aitool: 'tag-aitool', practice: 'tag-practice', case: 'tag-case',
+  atlas: 'tag-atlas', quiz: 'tag-quiz', notes: 'tag-notes',
+  worksheet: 'tag-worksheet', kahoot: 'tag-kahoot',
+  assignment: 'tag-assignment', admin: 'tag-admin'
+};
+
+const SECTION_META = {
+  required:    { letter: 'R', label: 'Required',           helper: 'Do these to pass' },
+  recommended: { letter: 'H', label: 'Highly recommended', helper: 'Do these to thrive' },
+  optional:    { letter: 'O', label: 'Optional',           helper: 'Go deeper if curious' },
+  refresher:   { letter: 'A', label: 'Anatomy refresher',  helper: 'Remedial structural review' }
+};
+
+function formatDOK(dok) {
+  if (dok === undefined || dok === null || dok === '') return '';
+  const s = String(dok).replace(/\s/g, '');
+  if (s === '1-4' || s === 'all' || s === 'All') return 'DOK 1-4';
+  if (s.includes(',')) return 'DOK ' + s.split(',').join('/');
+  return 'DOK ' + s;
+}
+
+// ============================================
+// SAMPLE RESOURCES
+// ============================================
+function sampleResources(systemName) {
+  return {
+    required: [
+      { title: `${systemName}: lecture slides`,    type: 'reading',  apType: 'anatomy', time: '20 min read' },
+      { title: `Lab manual chapter`,                type: 'lab',      apType: 'anatomy', time: 'In lab' },
+      { title: `Lab exam topic checklist`,          type: 'practice', apType: 'anatomy', time: '5 min', dok: '1' }
+    ],
+    recommended: [
+      { title: `${systemName} concept viewer`,      type: 'tool',     apType: 'anatomy', time: 'Self-paced' },
+      { title: `Visible Body walkthrough`,          type: 'atlas',    apType: 'anatomy', time: '15 min' },
+      { title: `${systemName} Kahoot review`,       type: 'kahoot',   apType: 'anatomy', time: '15 questions', dok: '1,2' },
+      { title: `${systemName} AI tutor`,            type: 'aitool',   apType: 'anatomy', time: 'Conversational' }
+    ],
+    optional: [
+      { title: `Khan Academy: ${systemName}`,       type: 'video',    apType: 'anatomy', time: '~30 min' },
+      { title: `Cadaver dissection clip`,           type: 'video',    apType: 'anatomy', time: '8 min' },
+      { title: `Clinical correlation reading`,      type: 'reading',  apType: 'anatomy', time: 'Brief' },
+      { title: `${systemName} DOK 3 challenge set`, type: 'practice', apType: 'anatomy', time: '8 questions', dok: '3' }
+    ]
+  };
+}
+function samplePhysResources(systemName) {
+  return {
+    required: [
+      { title: `${systemName} physiology lecture`,   type: 'reading',   apType: 'physiology', time: '25 min' },
+      { title: `Concept viewer: function & control`, type: 'tool',      apType: 'physiology', time: 'Self-paced' },
+      { title: `Calculation practice set`,           type: 'worksheet', apType: 'physiology', time: '15 min', dok: '2' }
+    ],
+    recommended: [
+      { title: `Clinical case walkthrough`,          type: 'case',      apType: 'physiology', time: '20 min', dok: '3' },
+      { title: `${systemName}: animation library`,   type: 'video',     apType: 'physiology', time: '12 min' },
+      { title: `${systemName} Kahoot`,               type: 'kahoot',    apType: 'physiology', time: '15 questions', dok: '2' },
+      { title: `Physiology AI tutor`,                type: 'aitool',    apType: 'physiology', time: 'Conversational' }
+    ],
+    optional: [
+      { title: `Primary literature: classic experiment`, type: 'reading',  apType: 'physiology', time: 'Brief' },
+      { title: `Boards-style practice questions`,        type: 'practice', apType: 'physiology', time: '15 min', dok: '3' },
+      { title: `Pathophysiology deep dive`,              type: 'reading',  apType: 'physiology', time: '~40 min' }
+    ],
+    refresher: [
+      { title: `${systemName}: anatomy review tour`, type: 'atlas',    apType: 'anatomy', time: '10 min' },
+      { title: `Key structures vocabulary`,          type: 'practice', apType: 'anatomy', time: '5 min', dok: '1' },
+      { title: `Cadaver clip: orientation`,          type: 'video',    apType: 'anatomy', time: '6 min' }
+    ]
+  };
+}
+function sampleAPResources(systemName) {
+  return {
+    required: [
+      { title: `${systemName} anatomy: structures to know`, type: 'reading', apType: 'anatomy',    time: '20 min' },
+      { title: `${systemName} physiology: functions`,       type: 'reading', apType: 'physiology', time: '25 min' },
+      { title: `Lab manual chapter`,                         type: 'lab',     apType: 'anatomy',    time: 'In lab' }
+    ],
+    recommended: [
+      { title: `Concept viewer: structure to function`, type: 'tool',     apType: 'physiology', time: 'Self-paced' },
+      { title: `Visible Body walkthrough`,              type: 'atlas',    apType: 'anatomy',    time: '15 min' },
+      { title: `Clinical case: linking A and P`,        type: 'case',     apType: 'physiology', time: '20 min', dok: '3' },
+      { title: `${systemName} Kahoot`,                  type: 'kahoot',   apType: 'physiology', time: '20 questions', dok: '2' },
+      { title: `${systemName} AI tutor`,                type: 'aitool',   apType: 'physiology', time: 'Conversational' }
+    ],
+    optional: [
+      { title: `Khan Academy video series`,             type: 'video',   apType: 'anatomy',    time: '~30 min' },
+      { title: `Pathophysiology reading`,               type: 'reading', apType: 'physiology', time: '~25 min' },
+      { title: `Cadaver clip for ${systemName}`,        type: 'video',   apType: 'anatomy',    time: '8 min' }
+    ]
+  };
+}
+
+// ============================================
+// COURSE TOOLKITS (categorized)
+// ============================================
+const TOOLKIT_CATS = {
+  ai:       { label: 'AI Tools', sub: 'AI tutors and conversational study aids' },
+  practice: { label: 'Practice', sub: 'DOK generators and practice worksheets' },
+  games:    { label: 'Games',    sub: 'Kahoots and game-based review' },
+  admin:    { label: 'Admin',    sub: 'Syllabus, schedules, policies' }
+};
+const TOOLKIT_ANATOMY = [
+  { cat: 'admin',    title: 'Syllabus & Course Calendar', type: 'admin',    desc: 'TBL session schedule, lab exam dates, due dates, and policies. Updated for Summer 2026.', meta: 'Updated June 2026' },
+  { cat: 'admin',    title: 'Lab Schedule & Safety',      type: 'admin',    desc: 'Weekly lab activities, dissection schedule, and safety protocols.',                       meta: '5 lab exams' },
+  { cat: 'ai',       title: 'Course AI Study Buddy',      type: 'aitool',   desc: 'Chat-based tutor trained on your syllabus and lecture content. Test your understanding any time.', meta: 'Always available' },
+  { cat: 'practice', title: 'DOK Practice Generator',     type: 'practice', desc: 'Generates practice questions at any DOK level (1 through 4). Pick your cognitive depth and module focus.', meta: 'Up to 50 questions', dok: '1-4' },
+  { cat: 'games',    title: 'Master Kahoot Bank',         type: 'kahoot',   desc: 'Every Kahoot from every module, organized by week. Play solo or assemble a session.',     meta: '24 sets · DOK 1/2' }
+];
+const TOOLKIT_AP = [
+  { cat: 'admin',    title: 'Syllabus & Calendar',        type: 'admin',     desc: 'Session schedule, exam dates, due dates, and policies.',                                  meta: 'Fall 2026' },
+  { cat: 'ai',       title: 'Course AI Study Buddy',      type: 'aitool',    desc: 'Chat-based tutor that handles both anatomy structures and physiology mechanisms.',         meta: 'Always available' },
+  { cat: 'ai',       title: 'ABG Tutor',                  type: 'aitool',    desc: 'Practice arterial blood gas interpretation with instant feedback.',                        meta: 'Built into renal/resp' },
+  { cat: 'practice', title: 'Hemodynamic Calculations',   type: 'worksheet', desc: 'Practice cardiac output, mean arterial pressure, and resistance calculations.',            meta: '15 problems' },
+  { cat: 'practice', title: 'DOK Practice Generator',     type: 'practice',  desc: 'Generates practice questions at any DOK level. Choose recall, application, or strategic clinical reasoning.', meta: 'Up to 50 questions', dok: '1-4' },
+  { cat: 'games',    title: 'Master Kahoot Bank',         type: 'kahoot',    desc: 'All module Kahoots in one place. Filter by anatomy, physiology, or both.',                meta: '21 sets · DOK 1/2' }
+];
+const TOOLKIT_PHYS = [
+  { cat: 'admin',    title: 'Course Calendar & Policies', type: 'admin',    desc: 'Lecture schedule, exam dates, and academic policies.',                                     meta: 'Fall 2026' },
+  { cat: 'ai',       title: 'Course AI Study Buddy',      type: 'aitool',   desc: 'Mechanism-focused tutor. Walk through pathways, regulation, and clinical cases.',          meta: 'Always available' },
+  { cat: 'ai',       title: 'ABG Tutor',                  type: 'aitool',   desc: 'Practice acid-base interpretation with progressive difficulty.',                           meta: '4 difficulty levels' },
+  { cat: 'practice', title: 'DOK Practice Generator',     type: 'practice', desc: 'Generates physiology questions at any DOK level. Recall through clinical reasoning.',     meta: 'Up to 50 questions', dok: '1-4' },
+  { cat: 'games',    title: 'Master Kahoot Bank',         type: 'kahoot',   desc: 'Every Kahoot organized by module and system.',                                              meta: '18 sets · DOK 2' }
+];
+
+const MOD_TOOLS_SAMPLE = (modName) => [
+  { title: `${modName} Kahoot`,        type: 'kahoot',   meta: '15 questions',     dok: '1,2' },
+  { title: `${modName} DOK Practice`,  type: 'practice', meta: 'Pick your level',  dok: '1-4' },
+  { title: `${modName} AI Tutor`,      type: 'aitool',   meta: 'Conversational' },
+  { title: `${modName} Lab Activity`,  type: 'lab',      meta: 'In-lab' }
+];
+
+// ============================================
+// COURSE BUILDERS
+// ============================================
+function buildAnatomyCourse() {
+  const M = (id, num, name, meta, desc, topics, tools) => ({ id, num, name, meta, desc, topics, tools: tools || [] });
+  const T = (id, name, kind, sub) => ({ id, name, kind, sub: sub || '', resources: sampleResources(name) });
+  return {
+    type: 'anatomy', typeLabel: 'Anatomy course',
+    code: 'BIO 004', term: 'Summer 2026',
+    title: 'Human <em>Anatomy</em>',
+    subtitle: 'Eight modules. One body. Pick a module to dive into its topics.',
+    sections: ['required', 'recommended', 'optional'],
+    showAPFilter: false, showLegend: false,
+    toolkit: TOOLKIT_ANATOMY,
+    modules: [
+      M('m1', '01', 'Foundation & Histology', 'Lab Exam 1 prep', 'Anatomical terminology, body cavities, tissue types, and the language anatomists use to describe location.', [
+        T('m1-org',  'Body Organization & Terminology', ['system','region'], 'Foundation'),
+        T('m1-hist', 'Histology: Four Tissue Types',     ['system'],          'Tissue level')
+      ], MOD_TOOLS_SAMPLE('Module 1')),
+      M('m2', '02', 'Integumentary & Skeletal', 'Lab Exam 1 prep', 'Skin layers and accessory structures. Bone tissue, axial skeleton, appendicular skeleton, and joint classification.', [
+        T('m2-int',  'Integumentary System',          ['system'],          'Body covering'),
+        T('m2-skel', 'Skeletal System: Bone Tissue',  ['system'],          'Histology to gross'),
+        T('m2-axi',  'Axial Skeleton',                ['system','region'], 'Skull, vertebrae, thorax'),
+        T('m2-app',  'Appendicular Skeleton',         ['system','region'], 'Limbs and girdles')
+      ], MOD_TOOLS_SAMPLE('Module 2')),
+      M('m3', '03', 'Muscular System & Articulations', 'Lab Exam 2 prep', 'Skeletal muscle organization, named muscles by region, and joint structure and function.', [
+        T('m3-mus',  'Muscle Tissue & Organization', ['system'],          'Microscopic to gross'),
+        T('m3-tr',   'Trunk & Head Muscles',         ['system','region'], 'Axial musculature'),
+        T('m3-lim',  'Limb Muscles',                 ['system','region'], 'Appendicular musculature'),
+        T('m3-art',  'Articulations',                ['system'],          'Joint classification')
+      ], MOD_TOOLS_SAMPLE('Module 3')),
+      M('m4', '04', 'Nervous System & Special Senses', 'Lab Exam 3 prep', 'Central and peripheral nervous system organization. Brain, spinal cord, cranial and spinal nerves, and the special senses.', [
+        T('m4-cns',  'Central Nervous System',     ['system','region'], 'Brain & spinal cord'),
+        T('m4-pns',  'Peripheral Nervous System',  ['system'],          'Nerves & ganglia'),
+        T('m4-ans',  'Autonomic Nervous System',   ['system'],          'Sympathetic & parasympathetic'),
+        T('m4-sen',  'Special Senses',             ['system','region'], 'Eye, ear, taste, smell')
+      ], MOD_TOOLS_SAMPLE('Module 4')),
+      M('m5', '05', 'Endocrine & Cardiovascular', 'Lab Exam 4 prep', 'Endocrine glands and hormones. Heart anatomy, blood vessels, and circulatory pathways.', [
+        T('m5-end',  'Endocrine System',           ['system'],          'Glands & hormones'),
+        T('m5-hrt',  'Heart',                      ['system','region'], 'Chambers, valves, vessels'),
+        T('m5-vas',  'Vascular System',            ['system'],          'Arteries, veins, capillaries'),
+        T('m5-blo',  'Blood',                      ['system'],          'Components & function')
+      ], MOD_TOOLS_SAMPLE('Module 5')),
+      M('m6', '06', 'Lymphatic, Respiratory & Digestive', 'Lab Exam 4 prep', 'Lymphatic vessels and immunity. Airways and gas exchange. The alimentary canal and accessory digestive organs.', [
+        T('m6-lym',  'Lymphatic & Immune System',  ['system'],          'Defense & drainage'),
+        T('m6-res',  'Respiratory System',         ['system','region'], 'Upper & lower airways'),
+        T('m6-dig',  'Digestive System',           ['system','region'], 'GI tract & accessory organs')
+      ], MOD_TOOLS_SAMPLE('Module 6')),
+      M('m7', '07', 'Urinary & Fluid Balance', 'Lab Exam 5 prep', 'Kidney anatomy, the nephron, urinary tract, and the structures involved in fluid and electrolyte balance.', [
+        T('m7-uri', 'Urinary System',              ['system','region'], 'Kidneys & urinary tract'),
+        T('m7-flu', 'Fluid & Electrolyte Anatomy', ['system'],          'Compartments & structures')
+      ], MOD_TOOLS_SAMPLE('Module 7')),
+      M('m8', '08', 'Reproductive & Development', 'Lab Exam 5 prep', 'Male and female reproductive anatomy. Embryonic development and clinical correlations.', [
+        T('m8-rep-m', 'Male Reproductive System',   ['system','region'], 'Gonads & ducts'),
+        T('m8-rep-f', 'Female Reproductive System', ['system','region'], 'Ovaries, uterus, accessory'),
+        T('m8-dev',   'Development',                ['system'],          'Embryology basics')
+      ], MOD_TOOLS_SAMPLE('Module 8'))
+    ]
+  };
+}
+function buildPhysiologyCourse() {
+  const M = (id, num, name, meta, desc, topics, tools) => ({ id, num, name, meta, desc, topics, tools: tools || [] });
+  const T = (id, name, kind, sub) => ({ id, name, kind, sub: sub || '', resources: samplePhysResources(name) });
+  return {
+    type: 'physiology', typeLabel: 'Physiology course',
+    code: 'BIO 005', term: 'Fall 2026',
+    title: 'Human <em>Physiology</em>',
+    subtitle: 'Function, regulation, and the integrated mechanisms that keep the body alive. Each module pairs core physiology with a remedial anatomy refresher.',
+    sections: ['required', 'recommended', 'optional', 'refresher'],
+    showAPFilter: false, showLegend: false,
+    toolkit: TOOLKIT_PHYS,
+    modules: [
+      M('p1', '01', 'Cellular & Membrane Physiology', 'Foundation', 'Membrane transport, resting membrane potential, action potentials, and intercellular signaling.', [
+        T('p1-mem', 'Membrane Transport',         ['system'], 'Diffusion to active transport'),
+        T('p1-rmp', 'Resting Membrane Potential', ['system'], 'Ionic basis'),
+        T('p1-ap',  'Action Potentials',          ['system'], 'Excitable cell function')
+      ], MOD_TOOLS_SAMPLE('Module 1')),
+      M('p2', '02', 'Neural & Muscle Physiology', 'Module 2', 'Synaptic transmission, neural integration, and the molecular events of muscle contraction.', [
+        T('p2-syn', 'Synaptic Transmission',      ['system'], 'Chemical signaling'),
+        T('p2-mus', 'Skeletal Muscle Contraction',['system'], 'Sliding filament theory'),
+        T('p2-smo', 'Smooth & Cardiac Muscle',    ['system'], 'Comparative function')
+      ], MOD_TOOLS_SAMPLE('Module 2')),
+      M('p3', '03', 'Cardiovascular Physiology', 'Module 3', 'The cardiac cycle, cardiac output, blood pressure regulation, and microcirculation.', [
+        T('p3-card', 'Cardiac Cycle',              ['system','region'], 'Pressure & volume'),
+        T('p3-co',   'Cardiac Output & Regulation',['system'],          'Frank-Starling and beyond'),
+        T('p3-bp',   'Blood Pressure Regulation',  ['system'],          'Short and long term'),
+        T('p3-mic',  'Microcirculation',           ['system'],          'Capillary exchange')
+      ], MOD_TOOLS_SAMPLE('Module 3')),
+      M('p4', '04', 'Respiratory Physiology', 'Module 4', 'Mechanics of breathing, gas exchange, oxygen and CO2 transport, and respiratory control.', [
+        T('p4-mec', 'Mechanics of Breathing', ['system','region'], 'Pressures & compliance'),
+        T('p4-gas', 'Gas Exchange',           ['system'],          'Alveolar-capillary unit'),
+        T('p4-tra', 'O2 & CO2 Transport',     ['system'],          'Hemoglobin and beyond'),
+        T('p4-ctrl','Respiratory Control',    ['system'],          'Central and peripheral')
+      ], MOD_TOOLS_SAMPLE('Module 4')),
+      M('p5', '05', 'Renal Physiology & Acid-Base', 'Module 5', 'Glomerular filtration, tubular function, fluid and electrolyte balance, and acid-base regulation.', [
+        T('p5-gfr', 'Glomerular Filtration',     ['system','region'], 'Forces and clearance'),
+        T('p5-tub', 'Tubular Function',          ['system','region'], 'Reabsorption & secretion'),
+        T('p5-fl',  'Fluid & Electrolyte Balance',['system'],         'Body compartments'),
+        T('p5-ab',  'Acid-Base Physiology',      ['system'],          'Henderson-Hasselbalch')
+      ], MOD_TOOLS_SAMPLE('Module 5')),
+      M('p6', '06', 'GI, Endocrine & Reproductive', 'Module 6', 'GI motility and absorption, endocrine control, and the integrated physiology of reproduction.', [
+        T('p6-gi',  'GI Motility & Absorption',  ['system','region'], 'From mouth to colon'),
+        T('p6-end', 'Endocrine Control',         ['system'],          'Hypothalamus to target'),
+        T('p6-rep', 'Reproductive Physiology',   ['system','region'], 'HPG axis & cycles')
+      ], MOD_TOOLS_SAMPLE('Module 6'))
+    ]
+  };
+}
+function buildAPCourse() {
+  const M = (id, num, name, meta, desc, topics, tools) => ({ id, num, name, meta, desc, topics, tools: tools || [] });
+  const T = (id, name, kind, sub) => ({ id, name, kind, sub: sub || '', resources: sampleAPResources(name) });
+  return {
+    type: 'ap', typeLabel: 'Anatomy + Physiology',
+    code: 'BIO 431', term: 'Fall 2026',
+    title: 'Anatomy &amp; <em>Physiology</em>',
+    subtitle: 'Structure and function studied together. Filter the resources to focus on anatomy or physiology.',
+    sections: ['required', 'recommended', 'optional'],
+    showAPFilter: true, showLegend: true,
+    toolkit: TOOLKIT_AP,
+    modules: [
+      M('ap1', '01', 'Foundation: Cells & Tissues', 'Module 1', 'Cell structure, membrane transport, and the four tissue types that build every organ.', [
+        T('ap1-cell','Cell Structure & Transport', ['system'], 'Foundation'),
+        T('ap1-tis', 'Tissues',                    ['system'], 'Four primary types')
+      ], MOD_TOOLS_SAMPLE('Module 1')),
+      M('ap2', '02', 'Integumentary & Skeletal', 'Module 2', 'Skin structure and function. Bone tissue, the skeleton, and joint biomechanics.', [
+        T('ap2-int', 'Integumentary',           ['system'],          'Skin & accessory structures'),
+        T('ap2-bone','Bone & Skeletal System',  ['system','region'], 'Tissue to gross'),
+        T('ap2-art', 'Articulations',           ['system'],          'Joint structure & function')
+      ], MOD_TOOLS_SAMPLE('Module 2')),
+      M('ap3', '03', 'Muscular System', 'Module 3', 'Muscle anatomy, contraction physiology, and the major muscles by region.', [
+        T('ap3-mus','Muscle Tissue & Contraction', ['system'],          'Sliding filaments'),
+        T('ap3-reg','Major Muscles by Region',     ['system','region'], 'Trunk and limbs')
+      ], MOD_TOOLS_SAMPLE('Module 3')),
+      M('ap4', '04', 'Nervous & Endocrine', 'Module 4', 'Nervous system organization and function. Endocrine glands and hormone action.', [
+        T('ap4-cns', 'Central Nervous System',     ['system','region'], 'Brain & spinal cord'),
+        T('ap4-pns', 'Peripheral & Autonomic',     ['system'],          'Nerves & ANS'),
+        T('ap4-end', 'Endocrine System',           ['system'],          'Glands & hormones')
+      ], MOD_TOOLS_SAMPLE('Module 4')),
+      M('ap5', '05', 'Cardiovascular & Lymphatic', 'Module 5', 'Heart anatomy and the cardiac cycle. Vessels, blood pressure regulation, and the lymphatic system.', [
+        T('ap5-hrt', 'Heart Anatomy & Cycle',      ['system','region'], 'Structure to function'),
+        T('ap5-vas', 'Vascular System & BP',       ['system'],          'Vessels & regulation'),
+        T('ap5-blo', 'Blood',                      ['system'],          'Components & function'),
+        T('ap5-lym', 'Lymphatic & Immune',         ['system'],          'Defense & drainage')
+      ], MOD_TOOLS_SAMPLE('Module 5')),
+      M('ap6', '06', 'Respiratory, Digestive & Urinary', 'Module 6', 'Three organ systems with strong structure-function coupling and shared themes of transport and regulation.', [
+        T('ap6-res', 'Respiratory System',         ['system','region'], 'Anatomy & gas exchange'),
+        T('ap6-dig', 'Digestive System',           ['system','region'], 'GI tract & function'),
+        T('ap6-uri', 'Urinary System',             ['system','region'], 'Kidneys & filtration')
+      ], MOD_TOOLS_SAMPLE('Module 6')),
+      M('ap7', '07', 'Reproductive & Development', 'Module 7', 'Male and female reproductive anatomy and physiology. Endocrine control and basic embryology.', [
+        T('ap7-rep', 'Reproductive Systems',       ['system','region'], 'Anatomy and function'),
+        T('ap7-dev', 'Development',                ['system'],          'Embryology basics')
+      ], MOD_TOOLS_SAMPLE('Module 7'))
+    ]
+  };
+}
+
+const COURSES = {
+  anatomy:    buildAnatomyCourse(),
+  ap:         buildAPCourse(),
+  physiology: buildPhysiologyCourse()
+};
+
+// ============================================
+// STATE
+// ============================================
+const state = {
+  view: 'hub',
+  course: 'anatomy',
+  activeModuleId: null,
+  organization: 'system',
+  apFilter: 'both',
+  activeSection: {},
+  openToolkitCats: new Set()
+};
+
+// ============================================
+// VIEW SWITCHING
+// ============================================
+function switchView(viewName) {
+  state.view = viewName;
+  document.getElementById('view-hub').classList.toggle('active', viewName === 'hub');
+  document.getElementById('view-module').classList.toggle('active', viewName === 'module');
+}
+
+function goHub() {
+  state.activeModuleId = null;
+  state.activeSection = {};
+  switchView('hub');
+  renderHub();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goModule(moduleId) {
+  state.activeModuleId = moduleId;
+  state.activeSection = {};
+  switchView('module');
+  renderModule();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================
+// HUB RENDER
+// ============================================
+function renderHub() {
+  const c = COURSES[state.course];
+  const typeEl = document.getElementById('hero-type');
+  typeEl.textContent = c.typeLabel;
+  typeEl.dataset.type = c.type;
+  document.getElementById('hero-meta').textContent = `${c.code} · ${c.term}`;
+  document.getElementById('hero-title').innerHTML = c.title;
+  document.getElementById('hero-sub').textContent = c.subtitle;
+
+  renderToolkit();
+  renderPicker();
+}
+
+function renderToolkit() {
+  const c = COURSES[state.course];
+  const host = document.getElementById('toolkit-host');
+  if (!c.toolkit || c.toolkit.length === 0) { host.innerHTML = ''; return; }
+
+  // Group items by category
+  const grouped = {};
+  c.toolkit.forEach(t => {
+    const cat = t.cat || 'ai';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(t);
+  });
+
+  const renderCard = (t) => {
+    const tagClass = TYPE_TAG_CLASS[t.type] || 'tag-tool';
+    const tagLabel = TYPE_LABELS[t.type] || t.type;
+    const dokHTML = t.dok ? `<span class="dok-badge">${formatDOK(t.dok)}</span>` : '';
+    return `
+      <a class="toolkit-card" href="#" target="_top" aria-label="${escapeAttr(t.title)}, ${tagLabel}">
+        <div class="toolkit-card-tag-row">
+          <span class="res-tag ${tagClass}">${tagLabel}</span>
+          ${dokHTML}
+        </div>
+        <span class="toolkit-card-title">${escapeHTML(t.title)}</span>
+        <span class="toolkit-card-desc">${escapeHTML(t.desc)}</span>
+        ${t.meta ? `<span class="toolkit-card-meta">${escapeHTML(t.meta)}</span>` : ''}
+      </a>
+    `;
+  };
+
+  // Render one shutter per category, in TOOLKIT_CATS order, only if it has items
+  const shuttersHTML = Object.keys(TOOLKIT_CATS)
+    .filter(catKey => grouped[catKey] && grouped[catKey].length > 0)
+    .map(catKey => {
+      const meta = TOOLKIT_CATS[catKey];
+      const items = grouped[catKey];
+      const isOpen = state.openToolkitCats.has(catKey);
+      const bodyHTML = isOpen
+        ? `<div class="toolkit-grid">${items.map(renderCard).join('')}</div>`
+        : '';
+      return `
+        <article class="toolkit-shutter" data-open="${isOpen}" data-tk-cat="${catKey}">
+          <button class="toolkit-shutter-trigger" type="button"
+                  aria-expanded="${isOpen}"
+                  aria-controls="tk-body-${catKey}"
+                  data-tk-toggle="${catKey}">
+            <span class="louvers" aria-hidden="true">
+              <span class="louver"></span>
+              <span class="louver"></span>
+              <span class="louver"></span>
+            </span>
+            <span class="toolkit-shutter-name-block">
+              <span class="toolkit-shutter-name">${escapeHTML(meta.label)}</span>
+              <span class="toolkit-shutter-sub">${escapeHTML(meta.sub)}</span>
+            </span>
+            <span class="toolkit-shutter-count">${items.length} ${items.length === 1 ? 'item' : 'items'}</span>
+            <svg class="toolkit-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <polyline points="3,6 8,11 13,6"></polyline>
+            </svg>
+          </button>
+          <div class="toolkit-shutter-body" id="tk-body-${catKey}">${bodyHTML}</div>
+        </article>
+      `;
+    }).join('');
+
+  host.innerHTML = `
+    <section class="toolkit" aria-labelledby="toolkit-title">
+      <header class="toolkit-head">
+        <h2 class="toolkit-head-title" id="toolkit-title">Course toolkit</h2>
+        <span class="toolkit-head-sub">${c.toolkit.length} ${c.toolkit.length === 1 ? 'resource' : 'resources'} you'll use all term</span>
+      </header>
+      <div class="toolkit-shutter-list">${shuttersHTML}</div>
+    </section>
+  `;
+
+  // Attach toggle handlers
+  host.querySelectorAll('[data-tk-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const catKey = btn.dataset.tkToggle;
+      const shutter = btn.closest('.toolkit-shutter');
+      const bodyHost = shutter.querySelector('.toolkit-shutter-body');
+
+      if (state.openToolkitCats.has(catKey)) {
+        state.openToolkitCats.delete(catKey);
+        shutter.dataset.open = 'false';
+        btn.setAttribute('aria-expanded', 'false');
+        bodyHost.innerHTML = '';
+      } else {
+        state.openToolkitCats.add(catKey);
+        shutter.dataset.open = 'true';
+        btn.setAttribute('aria-expanded', 'true');
+        const items = grouped[catKey];
+        bodyHost.innerHTML = `<div class="toolkit-grid">${items.map(renderCard).join('')}</div>`;
+      }
+    });
+  });
+}
+
+function renderPicker() {
+  const c = COURSES[state.course];
+  const grid = document.getElementById('picker-grid');
+  document.getElementById('picker-sub').textContent = `${c.modules.length} ${c.modules.length === 1 ? 'module' : 'modules'} · choose one to see its topics`;
+
+  grid.innerHTML = c.modules.map(mod => {
+    const topicCount = mod.topics.length;
+    return `
+      <button class="picker-card" type="button" data-pick-module="${mod.id}" aria-label="Module ${mod.num}, ${escapeAttr(mod.name)}, ${topicCount} topics">
+        <div class="picker-card-num-row">
+          <span class="picker-card-num">${escapeHTML(mod.num)}</span>
+          <span class="picker-card-meta">${escapeHTML(mod.meta)}</span>
+        </div>
+        <h3 class="picker-card-title">${escapeHTML(mod.name)}</h3>
+        <p class="picker-card-desc">${escapeHTML(mod.desc || '')}</p>
+        <div class="picker-card-foot">
+          <span class="picker-card-count">${topicCount} ${topicCount === 1 ? 'topic' : 'topics'}</span>
+          <span class="picker-card-arrow" aria-hidden="true">Open <span>→</span></span>
+        </div>
+      </button>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('[data-pick-module]').forEach(btn => {
+    btn.addEventListener('click', () => goModule(btn.dataset.pickModule));
+  });
+}
+
+// ============================================
+// MODULE RENDER
+// ============================================
+function renderModule() {
+  const c = COURSES[state.course];
+  const mod = c.modules.find(m => m.id === state.activeModuleId);
+  if (!mod) { goHub(); return; }
+
+  document.getElementById('breadcrumb-current').textContent = `Module ${mod.num}: ${mod.name}`;
+  document.getElementById('mod-hero-num').textContent = mod.num;
+  document.getElementById('mod-hero-meta').textContent = mod.meta;
+  document.getElementById('mod-hero-title').textContent = mod.name;
+  document.getElementById('mod-hero-desc').textContent = mod.desc || '';
+
+  // Show refresher legend item only for Physiology
+  const refresherLegend = document.getElementById('circle-legend-refresher');
+  if (c.sections.includes('refresher')) refresherLegend.removeAttribute('hidden');
+  else refresherLegend.setAttribute('hidden', '');
+
+  renderControls();
+  renderLegend();
+  renderModuleTools(mod);
+  renderTopics(mod);
+}
+
+function renderControls() {
+  const c = COURSES[state.course];
+  const wrap = document.getElementById('controls');
+  const showAP = c.showAPFilter;
+  wrap.classList.remove('has-1', 'has-2');
+  wrap.classList.add(showAP ? 'has-2' : 'has-1');
+
+  let html = `
+    <div class="control-group">
+      <label class="control-label" id="lbl-org">Organize topics by</label>
+      <div class="chip-row" role="group" aria-labelledby="lbl-org">
+        <button class="chip" data-org="system" aria-pressed="${state.organization==='system'}">Body system</button>
+        <button class="chip" data-org="region" aria-pressed="${state.organization==='region'}">Region</button>
+      </div>
+    </div>
+  `;
+  if (showAP) {
+    html += `
+      <div class="control-group">
+        <label class="control-label" id="lbl-ap">Show resources for</label>
+        <div class="chip-row" role="group" aria-labelledby="lbl-ap">
+          <button class="chip" data-ap="both" aria-pressed="${state.apFilter==='both'}">Both</button>
+          <button class="chip" data-ap="anatomy" aria-pressed="${state.apFilter==='anatomy'}">Anatomy only</button>
+          <button class="chip" data-ap="physiology" aria-pressed="${state.apFilter==='physiology'}">Physiology only</button>
+        </div>
+      </div>
+    `;
+  }
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('[data-org]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.organization = btn.dataset.org;
+      const c = COURSES[state.course];
+      const mod = c.modules.find(m => m.id === state.activeModuleId);
+      renderTopics(mod);
+      wrap.querySelectorAll('[data-org]').forEach(b =>
+        b.setAttribute('aria-pressed', b.dataset.org === state.organization));
+    });
+  });
+  wrap.querySelectorAll('[data-ap]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.apFilter = btn.dataset.ap;
+      const c = COURSES[state.course];
+      const mod = c.modules.find(m => m.id === state.activeModuleId);
+      renderTopics(mod);
+      wrap.querySelectorAll('[data-ap]').forEach(b =>
+        b.setAttribute('aria-pressed', b.dataset.ap === state.apFilter));
+    });
+  });
+}
+
+function renderLegend() {
+  const c = COURSES[state.course];
+  const host = document.getElementById('legend-host');
+  if (!c.showLegend) { host.innerHTML = ''; return; }
+  host.innerHTML = `
+    <div class="legend">
+      <span class="legend-label">Resources are tagged by content:</span>
+      <span class="legend-item"><span class="legend-tag tag-anat">Anat</span>Anatomy</span>
+      <span class="legend-item"><span class="legend-tag tag-phys">Phys</span>Physiology</span>
+    </div>
+  `;
+}
+
+function renderModuleTools(mod) {
+  const host = document.getElementById('module-tools-host');
+  if (!mod.tools || mod.tools.length === 0) { host.innerHTML = ''; return; }
+  const tools = mod.tools.map(t => {
+    const tagClass = TYPE_TAG_CLASS[t.type] || 'tag-tool';
+    const tagLabel = TYPE_LABELS[t.type] || t.type;
+    const dokHTML = t.dok ? `<span class="dok-badge">${formatDOK(t.dok)}</span>` : '';
+    return `
+      <a class="module-tool" href="#" target="_top" aria-label="${escapeAttr(t.title)}, ${tagLabel}${t.meta ? ', ' + t.meta : ''}">
+        <div class="module-tool-tag-row">
+          <span class="res-tag ${tagClass}">${tagLabel}</span>
+          ${dokHTML}
+        </div>
+        <span class="module-tool-title">${escapeHTML(t.title)}</span>
+        ${t.meta ? `<span class="module-tool-meta">${escapeHTML(t.meta)}</span>` : ''}
+      </a>
+    `;
+  }).join('');
+  host.innerHTML = `
+    <section class="module-tools" aria-labelledby="module-tools-title">
+      <header class="module-tools-head">
+        <h2 class="module-tools-title" id="module-tools-title">Module tools</h2>
+        <span class="module-tools-sub">Module-wide resources for this unit</span>
+      </header>
+      <div class="module-tools-grid">${tools}</div>
+    </section>
+  `;
+}
+
+function filterTopicsByOrg(topics) {
+  return topics.filter(t => t.kind.includes(state.organization));
+}
+function filterResourcesByAP(resources) {
+  if (state.apFilter === 'both') return resources;
+  return resources.filter(r => r.apType === state.apFilter);
+}
+
+function renderTopics(mod) {
+  const c = COURSES[state.course];
+  const list = document.getElementById('topics-list');
+  const visibleTopics = filterTopicsByOrg(mod.topics);
+
+  if (visibleTopics.length === 0) {
+    list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--ink-muted);font-family:var(--reading);font-size:16px;">No topics match the current filters.</div>`;
+    return;
+  }
+
+  list.innerHTML = visibleTopics.map(topic => renderTopicShutter(topic, c)).join('');
+  attachShutterHandlers();
+}
+
+function renderTopicShutter(topic, course) {
+  const activeSection = state.activeSection[topic.id] || null;
+  const isOpen = !!activeSection;
+
+  // Compute counts per section, applying AP filter when relevant
+  const counts = {};
+  course.sections.forEach(sec => {
+    const list = topic.resources[sec] || [];
+    const filtered = course.showAPFilter ? filterResourcesByAP(list) : list;
+    counts[sec] = filtered.length;
+  });
+
+  // Build the circle buttons
+  const circlesHTML = course.sections.map(sec => {
+    const meta = SECTION_META[sec];
+    const isActive = activeSection === sec;
+    return `
+      <button class="circle-btn" type="button"
+              data-circle="${sec}"
+              data-shutter-circle="${topic.id}|${sec}"
+              aria-pressed="${isActive}"
+              aria-label="${counts[sec]} ${meta.label} ${counts[sec] === 1 ? 'resource' : 'resources'} for ${escapeAttr(topic.name)}">
+        <span class="circle-letter" aria-hidden="true">${meta.letter}</span>
+        <span class="circle-count" aria-hidden="true">${counts[sec]}</span>
+      </button>
+    `;
+  }).join('');
+
+  // Build the body if a section is active
+  let bodyHTML = '';
+  if (activeSection) {
+    bodyHTML = renderTopicBody(topic, course, activeSection);
+  }
+
+  return `
+    <article class="shutter" data-shutter-id="${topic.id}" data-open="${isOpen}">
+      <div class="shutter-trigger-row">
+        <span class="louvers" aria-hidden="true">
+          <span class="louver"></span>
+          <span class="louver"></span>
+          <span class="louver"></span>
+        </span>
+        <div class="shutter-title-block">
+          <span class="shutter-title">${escapeHTML(topic.name)}</span>
+          ${topic.sub ? `<span class="shutter-sub">${escapeHTML(topic.sub)}</span>` : ''}
+        </div>
+        <div class="shutter-circles" role="group" aria-label="Sections for ${escapeAttr(topic.name)}">${circlesHTML}</div>
+      </div>
+      <div class="shutter-body-host" id="${topic.id}-body">${bodyHTML}</div>
+    </article>
+  `;
+}
+
+function renderTopicBody(topic, course, section) {
+  const meta = SECTION_META[section];
+  const list = topic.resources[section] || [];
+  const filtered = course.showAPFilter ? filterResourcesByAP(list) : list;
+
+  const cards = filtered.length === 0
+    ? `<div class="section-empty">No ${meta.label.toLowerCase()} resources match the current filter.</div>`
+    : `<div class="section-cards">${filtered.map(r => renderResource(r, course)).join('')}</div>`;
+
+  return `
+    <div class="shutter-body" role="region" aria-label="${meta.label} resources for ${escapeAttr(topic.name)}">
+      <div class="section-region region-${section}">
+        <div class="section-head">
+          <h4 class="section-name">${meta.label}</h4>
+          <span class="section-helper">${meta.helper}</span>
+        </div>
+        ${cards}
+      </div>
+    </div>
+  `;
+}
+
+function renderResource(r, course) {
+  const tagLabel = TYPE_LABELS[r.type] || r.type;
+  const tagClass = TYPE_TAG_CLASS[r.type] || 'tag-tool';
+  const showApTag = course.showAPFilter && state.apFilter === 'both';
+  const apTagClass = r.apType === 'anatomy' ? 'tag-anat' : r.apType === 'physiology' ? 'tag-phys' : '';
+  const apTagLabel = r.apType === 'anatomy' ? 'Anat' : r.apType === 'physiology' ? 'Phys' : '';
+  const dokHTML = r.dok ? `<span class="dok-badge">${formatDOK(r.dok)}</span>` : '';
+  return `
+    <a class="res" href="#" target="_top" aria-label="${escapeAttr(r.title)}, ${tagLabel}${r.dok ? ', ' + formatDOK(r.dok) : ''}${r.time ? ', ' + r.time : ''}">
+      <div class="res-tag-row">
+        <span class="res-tag ${tagClass}">${tagLabel}</span>
+        ${dokHTML}
+        ${showApTag ? `<span class="res-tag ${apTagClass}">${apTagLabel}</span>` : ''}
+      </div>
+      <span class="res-title">${escapeHTML(r.title)}</span>
+      ${r.time ? `<span class="res-meta">${escapeHTML(r.time)}</span>` : ''}
+      <span class="res-arrow" aria-hidden="true">View →</span>
+    </a>
+  `;
+}
+
+function attachShutterHandlers() {
+  document.querySelectorAll('[data-shutter-circle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const [topicId, sec] = btn.dataset.shutterCircle.split('|');
+      const shutter = document.querySelector(`.shutter[data-shutter-id="${topicId}"]`);
+      const bodyHost = shutter.querySelector(`#${CSS.escape(topicId)}-body`);
+      const currentActive = state.activeSection[topicId] || null;
+
+      if (currentActive === sec) {
+        // Same circle clicked again - close
+        state.activeSection[topicId] = null;
+        shutter.dataset.open = 'false';
+        bodyHost.innerHTML = '';
+        // Update aria-pressed on all circles in this shutter
+        shutter.querySelectorAll('[data-shutter-circle]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      } else {
+        // Different circle (or first click) - open with this section
+        state.activeSection[topicId] = sec;
+        shutter.dataset.open = 'true';
+        const c = COURSES[state.course];
+        const mod = c.modules.find(m => m.id === state.activeModuleId);
+        const topic = mod.topics.find(t => t.id === topicId);
+        bodyHost.innerHTML = renderTopicBody(topic, c, sec);
+        shutter.querySelectorAll('[data-shutter-circle]').forEach(b => {
+          const [, bSec] = b.dataset.shutterCircle.split('|');
+          b.setAttribute('aria-pressed', bSec === sec ? 'true' : 'false');
+        });
+      }
+    });
+  });
+}
+
+// ============================================
+// COURSE TAB SWITCHING
+// ============================================
+document.querySelectorAll('.course-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    state.course = tab.dataset.course;
+    state.activeModuleId = null;
+    state.activeSection = {};
+    state.openToolkitCats = new Set();
+    if (state.course !== 'ap') state.apFilter = 'both';
+    document.querySelectorAll('.course-tab').forEach(t => {
+      const isActive = t === tab;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-pressed', isActive);
+    });
+    goHub();
+  });
+});
+
+document.getElementById('breadcrumb-back').addEventListener('click', goHub);
+
+// ============================================
+// UTILS
+// ============================================
+function escapeHTML(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+function escapeAttr(s) { return escapeHTML(s); }
+
+// ============================================
+// IFRAME HEIGHT SENDER
+// ============================================
+(function () {
+  const id = 'course-access-prototype';
+  function send() {
+    try {
+      const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      window.parent && window.parent.postMessage({ type: 'iframe-height', id, height: h }, '*');
+    } catch (e) {}
+  }
+  if ('ResizeObserver' in window) new ResizeObserver(send).observe(document.body);
+  window.addEventListener('load', send);
+  window.addEventListener('resize', send);
+  setInterval(send, 1500);
+})();
+
+// ============================================
+// INIT
+// ============================================
+renderHub();
+</script>
+</body>
+</html>
