@@ -126,7 +126,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .block-num {
   font-family: var(--sans); font-weight: 700;
-  font-size: 22px; color: var(--gold-text);
+  font-size: 22px; color: var(--terra-text);
   font-feature-settings: 'tnum'; line-height: 1;
 }
 .block-title {
@@ -281,6 +281,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .entry-tag.tag-phys { background: var(--teal-text); }
 .entry-tag.tag-structures { background: var(--terra-text); }
 .entry-tag.tag-references { background: var(--slate-text); }
+.entry-tag.tag-atlas-lab { background: var(--terra-text); }
+.entry-tag.tag-atlas-lecture { background: var(--ink-muted); }
+.entry-tag.tag-atlas { background: var(--ink-muted); }
 .entry-dok {
   font-family: var(--sans); font-size: 10px; font-weight: 600;
   color: var(--navy); padding: 1px 7px;
@@ -570,7 +573,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
         <div class="form-grid" style="margin-top: 12px;">
           <div class="field">
             <label class="field-label" for="f-subtitle">Tagline / subtitle (optional)</label>
-            <textarea class="textarea" id="f-subtitle" placeholder="Eight modules. One body. Pick a module to dive into its topics."></textarea>
+            <textarea class="textarea" id="f-subtitle" placeholder="A short tagline students see under the title. Avoid hardcoding the number of modules since you can change that later."></textarea>
           </div>
         </div>
         <div class="form-grid cols-2" style="margin-top: 12px;">
@@ -662,15 +665,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
       <section class="block">
         <header class="block-head">
           <span class="block-num">06</span>
-          <h2 class="block-title">Save your work</h2>
+          <h2 class="block-title">Edit it later</h2>
         </header>
         <p class="export-prose">
-          The builder doesn't auto-save yet. Download a config JSON to come back later. Reload it any time, even after closing the tab.
+          Two ways to come back to this hub and add or change content without rebuilding from scratch:
+        </p>
+        <p class="export-prose">
+          <strong>Option A · Re-open the published HTML.</strong> Every hub you download has its full editable config <em>embedded inside it</em>. To edit later, open this builder again and click <strong>Load saved hub</strong> below, then pick the same <code>.html</code> file you uploaded to Kajabi. All your modules, toolkit, topics, and resources come back. Edit, re-export, replace the file on Kajabi. One file, edited forever.
+        </p>
+        <p class="export-prose">
+          <strong>Option B · Save a config JSON.</strong> A lightweight backup of your edit state. Useful if you want to keep history (config-v1.json, config-v2.json) or share the structure without the full HTML file.
         </p>
         <div class="toolbar">
-          <button class="btn-sm" id="btn-save-config">↓ Save config (JSON)</button>
-          <button class="btn-sm" id="btn-load-config">↑ Load config (JSON)</button>
-          <input type="file" id="config-file-input" accept=".json" class="hidden">
+          <button class="btn-sm" id="btn-load-config">↑ Load saved hub (.html or .json)</button>
+          <button class="btn-sm" id="btn-save-config">↓ Save config (JSON only)</button>
+          <input type="file" id="config-file-input" accept=".json,.html" class="hidden">
         </div>
       </section>
 
@@ -716,36 +725,43 @@ https://example.com/quiz | Module 2 review quiz"></textarea>
 // ============================================
 const TYPE_LABELS = {
   reading: 'Reading', video: 'Video', lab: 'Lab', tool: 'Tool',
-  aitool: 'AI Tool', practice: 'Practice', case: 'Case',
-  atlas: 'Atlas', quiz: 'Quiz', notes: 'Notes',
+  aitool: 'AI Tool', practice: 'Practice Generator', case: 'Case',
+  'atlas-lab': 'Lab Atlas', 'atlas-lecture': 'Lecture Atlas',
+  atlas: 'Atlas',
+  quiz: 'Quiz', notes: 'Notes',
   worksheet: 'Worksheet', kahoot: 'Kahoot',
   assignment: 'Assignment', admin: 'Admin',
   structures: 'Structure List', references: 'References'
 };
 
 const TOOLKIT_CATS = {
-  ai:       { label: 'AI Tools', sub: 'AI tutors and conversational study aids' },
-  practice: { label: 'Practice', sub: 'DOK generators and practice worksheets' },
+  ai:       { label: 'AI Tools', sub: 'AI tutors, study buddies, and DOK practice generators' },
+  practice: { label: 'Practice', sub: 'Worksheets and quizzes you have authored' },
   games:    { label: 'Games',    sub: 'Kahoots and game-based review' },
   admin:    { label: 'Admin',    sub: 'Syllabus, schedules, policies' }
 };
 
 // Default type per category (for new resources)
-const CAT_DEFAULT_TYPE = { ai: 'aitool', practice: 'practice', games: 'kahoot', admin: 'admin' };
+const CAT_DEFAULT_TYPE = { ai: 'aitool', practice: 'worksheet', games: 'kahoot', admin: 'admin' };
 
-// Allowed types per toolkit category (filtered options)
+// Allowed types per toolkit category
+//   AI Tools   : conversational AI, AI tools, and DOK practice generators (auto-generated questions)
+//   Practice   : custom worksheets and quizzes she has authored herself
+//   Games      : Kahoot only (interactive games, not quizzes)
+//   Admin      : syllabus, schedules, policies
+//   Atlas types live at module/topic level only, not in the course-wide toolkit
 const CAT_TYPES = {
-  ai:       ['aitool', 'tool', 'atlas'],
-  practice: ['practice', 'worksheet', 'quiz'],
-  games:    ['kahoot', 'quiz'],
+  ai:       ['aitool', 'tool', 'practice'],
+  practice: ['worksheet', 'quiz'],
+  games:    ['kahoot'],
   admin:    ['admin', 'reading']
 };
 
 // All types for topic resources
-const TOPIC_TYPES = ['reading', 'references', 'video', 'lab', 'tool', 'aitool', 'practice', 'case', 'atlas', 'quiz', 'notes', 'worksheet', 'kahoot', 'assignment', 'structures'];
+const TOPIC_TYPES = ['reading', 'references', 'video', 'lab', 'tool', 'aitool', 'practice', 'case', 'atlas-lab', 'atlas-lecture', 'quiz', 'notes', 'worksheet', 'kahoot', 'assignment', 'structures'];
 
 // Module-level tool types: anything except generic "tool"
-const MOD_TOOL_TYPES = ['structures', 'references', 'reading', 'kahoot', 'practice', 'aitool', 'case', 'atlas', 'lab', 'video', 'worksheet', 'quiz', 'assignment'];
+const MOD_TOOL_TYPES = ['structures', 'references', 'reading', 'kahoot', 'practice', 'aitool', 'case', 'atlas-lab', 'atlas-lecture', 'lab', 'video', 'worksheet', 'quiz', 'assignment'];
 
 const SECTION_META = {
   required:    { letter: 'R', label: 'Required' },
@@ -1625,7 +1641,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--gold-text); out
 .picker-card { display: flex; flex-direction: column; padding: 22px 22px 18px; background: white; border: 1px solid var(--rule-soft); text-decoration: none; color: var(--ink); transition: all 0.2s var(--ease); cursor: pointer; text-align: left; font-family: var(--sans); }
 .picker-card:hover { border-color: var(--navy); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
 .picker-card-num-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
-.picker-card-num { font-family: var(--sans); font-weight: 700; font-size: 32px; color: var(--gold-text); line-height: 1; }
+.picker-card-num { font-family: var(--sans); font-weight: 700; font-size: 32px; color: var(--terra-text); line-height: 1; }
 .picker-card-meta { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); margin-left: auto; }
 .picker-card-title { font-family: var(--sans); font-weight: 700; font-size: 19px; line-height: 1.25; color: var(--navy); margin-bottom: 10px; }
 .picker-card-desc { font-family: var(--reading); font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 14px; }
@@ -1640,7 +1656,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--gold-text); out
 .breadcrumb-current { color: var(--navy); font-weight: 600; }
 .module-hero { padding: 8px 0 32px; border-bottom: 1px solid var(--rule-soft); margin-bottom: 28px; }
 .module-hero-num-row { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.module-hero-num { font-family: var(--sans); font-weight: 700; font-size: 26px; color: var(--gold-text); line-height: 1; }
+.module-hero-num { font-family: var(--sans); font-weight: 700; font-size: 26px; color: var(--terra-text); line-height: 1; }
 .module-hero-meta { font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--ink-muted); margin-left: auto; }
 .module-hero-title { font-family: var(--sans); font-weight: 700; font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.018em; line-height: 1.1; color: var(--navy); margin-bottom: 14px; }
 .module-hero-desc { font-family: var(--reading); font-size: 17px; color: var(--ink-soft); line-height: 1.55; max-width: 64ch; }
@@ -1723,6 +1739,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--gold-text); out
 .res-tag.tag-phys { background: var(--teal-text); }
 .res-tag.tag-structures { background: var(--terra-text); }
 .res-tag.tag-references { background: var(--slate-text); }
+.res-tag.tag-atlas-lab { background: var(--terra-text); }
+.res-tag.tag-atlas-lecture { background: var(--ink-muted); }
 .dok-badge { font-family: var(--sans); font-size: 10px; font-weight: 600; color: var(--navy); padding: 2px 8px; border: 1px solid var(--navy); border-radius: 999px; background: white; }
 .res-title { font-family: var(--sans); font-weight: 600; font-size: 14.5px; line-height: 1.35; }
 .res-meta { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); }
@@ -2030,6 +2048,19 @@ function generateStandaloneHTML() {
   const titleTag = (hub.title || 'Course Hub') + (hub.code ? ' · ' + hub.code : '');
   const desc = (hub.subtitle || `Course hub for ${hub.title || 'the course'}`).slice(0, 160);
   const body = buildHubBodyHTML(hub);
+
+  // Embed the full editable config inside the file. Lets the builder re-import
+  // the published HTML and recover full edit state. Escape `<` so the JSON can't
+  // accidentally close the script tag.
+  const editableConfig = {
+    _builderVersion: '0.4',
+    _generated: new Date().toISOString(),
+    course: state.course,
+    toolkit: state.toolkit,
+    modules: state.modules
+  };
+  const configJSON = JSON.stringify(editableConfig).replace(/</g, '\\u003c');
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2045,6 +2076,7 @@ function generateStandaloneHTML() {
 </head>
 <body>
 ${body}
+<script type="application/json" id="hub-config">${configJSON}<\/script>
 </body>
 </html>`;
 }
@@ -2124,8 +2156,27 @@ document.getElementById('config-file-input').addEventListener('change', (e) => {
   if (!file) return;
   const r = new FileReader();
   r.onload = (ev) => {
+    const text = ev.target.result;
+    let cfg;
+    // First try parsing as pure JSON config
     try {
-      const cfg = JSON.parse(ev.target.result);
+      cfg = JSON.parse(text);
+    } catch {
+      // Not JSON — try extracting embedded config from HTML
+      const m = text.match(/<script[^>]*id=["']hub-config["'][^>]*>([\s\S]*?)<\/script>/i);
+      if (m) {
+        try {
+          cfg = JSON.parse(m[1].replace(/\\u003c/g, '<'));
+        } catch {
+          alert('Found an embedded config in this HTML file but could not parse it. The file may be corrupted.');
+          return;
+        }
+      } else {
+        alert('Could not find a config in this file. Use a config JSON file or a hub HTML file generated by this builder.');
+        return;
+      }
+    }
+    try {
       state.course = Object.assign({type:'anatomy',organization:'modules',code:'',term:'',title:'',subtitle:'',instructor:'',institution:''}, cfg.course || {});
       state.toolkit = Array.isArray(cfg.toolkit) ? cfg.toolkit : [];
       state.modules = Array.isArray(cfg.modules) ? cfg.modules : [];
@@ -2139,10 +2190,15 @@ document.getElementById('config-file-input').addEventListener('change', (e) => {
       renderToolkitList();
       renderTKCounts();
       renderModules();
-      alert('Loaded ' + state.toolkit.length + ' toolkit ' + (state.toolkit.length===1?'item':'items') + ' and ' + state.modules.length + ' ' + (state.modules.length===1?'unit':'units') + '.');
-    } catch {
-      alert('Could not parse JSON.');
+      // Switch to Edit tab so they can see what loaded
+      document.querySelector('.tab[data-tab="edit"]').click();
+      const u = state.course.organization === 'weeks' ? 'weeks' : 'modules';
+      alert(`Loaded ${state.toolkit.length} toolkit ${state.toolkit.length===1?'item':'items'} and ${state.modules.length} ${state.modules.length===1?u.slice(0,-1):u}. Edit anything you want, then re-export.`);
+    } catch (err) {
+      alert('Could not load config: ' + err.message);
     }
+    // Clear the file input so loading the same file twice still triggers
+    e.target.value = '';
   };
   r.readAsText(file);
 });
@@ -2158,7 +2214,7 @@ document.getElementById('btn-load-demo').addEventListener('click', () => {
     code: 'BIO 004',
     term: 'Summer 2026',
     title: 'Human Anatomy',
-    subtitle: 'Eight modules. One body. Pick a module to dive into its topics.',
+    subtitle: 'An overview of the human body, organized system by system. Pick a module to dive into its topics.',
     instructor: 'Dr. Sharilyn Rennie',
     institution: 'Solano Community College'
   };
@@ -2169,7 +2225,8 @@ document.getElementById('btn-load-demo').addEventListener('click', () => {
     { id: uid(), cat: 'admin', title: 'Syllabus & Course Calendar', type: 'admin', desc: 'TBL session schedule, lab exam dates, due dates, and policies.', meta: 'Updated June 2026', dok: '', url: 'https://example.com/syllabus' },
     { id: uid(), cat: 'admin', title: 'Lab Schedule & Safety', type: 'admin', desc: 'Weekly lab activities, dissection schedule, and safety protocols.', meta: '5 lab exams', dok: '', url: 'https://example.com/lab-schedule' },
     { id: uid(), cat: 'ai', title: 'Course AI Study Buddy', type: 'aitool', desc: 'Chat-based tutor trained on your syllabus and lecture content.', meta: 'Always available', dok: '', url: 'https://example.com/ai-buddy' },
-    { id: uid(), cat: 'practice', title: 'DOK Practice Generator', type: 'practice', desc: 'Generates practice questions at any DOK level (1 through 4).', meta: 'Up to 50 questions', dok: '1-4', url: 'https://example.com/dok-gen' },
+    { id: uid(), cat: 'ai', title: 'DOK Practice Generator', type: 'practice', desc: 'Auto-generates practice questions at any DOK level (1 through 4).', meta: 'Up to 50 questions', dok: '1-4', url: 'https://example.com/dok-gen' },
+    { id: uid(), cat: 'practice', title: 'Anatomy Identification Worksheet', type: 'worksheet', desc: 'Practice identifying anatomical structures from images. Author: Dr. Rennie.', meta: '40 items', dok: '', url: 'https://example.com/id-worksheet' },
     { id: uid(), cat: 'games', title: 'Master Kahoot Bank', type: 'kahoot', desc: 'Every Kahoot from every module, organized by week.', meta: '24 sets · DOK 1/2', dok: '', url: 'https://example.com/kahoots' }
   ];
   state.modules = [
@@ -2201,7 +2258,7 @@ document.getElementById('btn-load-demo').addEventListener('click', () => {
           id: uid(), name: 'Histology: Four Tissue Types', sub: 'Tissue level', kind: ['system'],
           resources: {
             required: [
-              { id: uid(), title: 'Histology slide atlas', type: 'atlas', meta: 'Self-paced', url: 'https://example.com/r5' }
+              { id: uid(), title: 'Histology slide atlas', type: 'atlas-lab', meta: 'Self-paced · cadaver lab', url: 'https://example.com/r5' }
             ],
             recommended: [
               { id: uid(), title: 'Tissue ID practice quiz', type: 'practice', meta: '20 questions', dok: '2', url: 'https://example.com/r6' }
