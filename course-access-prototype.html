@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Course access hub prototype with module-first navigation. Three course types: Anatomy, Physiology, Anatomy and Physiology.">
+<meta name="description" content="Course Hub Builder - generate a v0.4-style course access hub for Anatomy, Physiology, or A&P courses.">
 <meta name="theme-color" content="#0A1322">
-<title>Course Access Prototype · MedMasters</title>
+<title>Course Hub Builder · MedMasters</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
   --gold: #D4A24C;
   --gold-text: #6E5018;
   --gold-bright: #E5B45C;
+  --gold-soft: #F5E9CD;
   --terra: #C25A3E;
   --terra-text: #7A2F18;
   --terra-bright: #E59575;
@@ -35,941 +36,682 @@
   --rule-faint: #E8EBEF;
   --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --reading: 'Atkinson Hyperlegible', 'Plus Jakarta Sans', sans-serif;
-  --mono: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --shadow-card: 0 1px 3px rgba(10,19,34,0.08), 0 1px 2px rgba(10,19,34,0.05);
   --shadow-lift: 0 6px 16px rgba(10,19,34,0.10), 0 3px 6px rgba(10,19,34,0.06);
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body { background: var(--bg-page); overflow-x: hidden; }
+html, body { background: var(--bg-page); }
 body {
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 17px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  font-weight: 400;
-  min-height: 100vh;
+  color: var(--ink); font-family: var(--sans); font-size: 16px;
+  line-height: 1.55; -webkit-font-smoothing: antialiased;
+  font-weight: 400; min-height: 100vh;
 }
-
 em { font-style: normal; font-weight: 700; }
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline: 3px solid var(--gold-text);
-  outline-offset: 2px;
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--gold-text); outline-offset: 2px;
 }
-
 .skip-link {
-  position: absolute;
-  top: -100px; left: 8px; z-index: 9999;
+  position: absolute; top: -100px; left: 8px; z-index: 9999;
   background: var(--navy); color: white;
   font-family: var(--sans); font-weight: 600; font-size: 14px;
   padding: 12px 18px; text-decoration: none;
   border: 3px solid var(--gold-text);
 }
 .skip-link:focus { top: 8px; outline: none; }
-
 .visually-hidden {
-  position: absolute !important;
-  width: 1px !important; height: 1px !important;
-  padding: 0 !important; margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0,0,0,0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
+  position: absolute !important; width: 1px !important; height: 1px !important;
+  padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+  clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important;
 }
-
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
 /* ============ APP SHELL ============ */
-.app {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 28px 40px 96px;
-  background: var(--bg);
-  min-height: 100vh;
+.builder-app {
+  max-width: 1200px; margin: 0 auto;
+  padding: 24px 36px 80px;
+  background: var(--bg); min-height: 100vh;
 }
-
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding-bottom: 22px; border-bottom: 1px solid var(--rule-soft);
-  margin-bottom: 36px; flex-wrap: wrap; gap: 16px;
+  padding-bottom: 18px; border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 24px; flex-wrap: wrap; gap: 14px;
 }
-.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .brand-mark {
-  font-family: var(--sans); font-weight: 500; font-size: 28px;
+  font-family: var(--sans); font-weight: 500; font-size: 26px;
   letter-spacing: -0.025em; line-height: 1; color: var(--navy);
 }
 .brand-mark em { color: var(--terra-text); }
 .brand-tag {
-  font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--ink-muted);
+  font-family: var(--sans); font-size: 13.5px; font-weight: 500; color: var(--ink-muted);
 }
 .proto-pill {
-  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
   background: var(--terra-text); color: white;
-  padding: 5px 12px; border-radius: 999px;
+  padding: 5px 11px; border-radius: 999px;
 }
 
-/* ============ COURSE TABS ============ */
-.course-tabs {
-  display: flex; gap: 0; margin-bottom: 28px; flex-wrap: wrap;
+/* ============ TABS ============ */
+.tabs {
+  display: flex; gap: 0; margin-bottom: 24px; flex-wrap: wrap;
 }
-.course-tab {
-  font-family: var(--sans); font-size: 14.5px; font-weight: 500;
+.tab {
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
   background: white; border: 1px solid var(--rule-soft); border-right-width: 0;
-  color: var(--ink-soft); padding: 12px 20px; cursor: pointer;
-  transition: all 0.18s var(--ease);
-  display: flex; align-items: center; gap: 10px;
+  color: var(--ink-soft); padding: 11px 20px; cursor: pointer;
+  transition: all 0.16s var(--ease);
 }
-.course-tab:last-of-type { border-right-width: 1px; }
-.course-tab:hover { background: var(--bg-tint); color: var(--navy); }
-.course-tab.active {
+.tab:last-of-type { border-right-width: 1px; }
+.tab:hover { background: var(--bg-tint); color: var(--navy); }
+.tab.active {
   background: var(--navy); color: white; border-color: var(--navy); font-weight: 600;
 }
-.course-tab-code {
-  font-family: var(--mono); font-size: 12.5px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.course-tab.active .course-tab-code {
-  color: var(--gold-bright);
-}
 
-/* ============ HERO (Hub view) ============ */
-.hero {
-  padding: 24px 0 36px; border-bottom: 1px solid var(--rule-soft);
-  margin-bottom: 32px;
-}
-.hero-pills {
-  display: flex; gap: 10px; margin-bottom: 18px;
-  flex-wrap: wrap; align-items: center;
-}
-.hero-type-pill {
-  font-family: var(--sans); font-size: 13px; font-weight: 600;
-  color: white; padding: 5px 14px; border-radius: 999px;
-  display: inline-flex; align-items: center; gap: 7px;
-}
-.hero-type-pill[data-type="anatomy"]    { background: var(--terra-text); }
-.hero-type-pill[data-type="physiology"] { background: var(--teal-text); }
-.hero-type-pill[data-type="ap"]         { background: var(--navy); }
-.hero-type-pill[data-type="ap"]::before {
-  content: '';
-  display: inline-block;
-  width: 9px; height: 9px;
-  background: linear-gradient(135deg, var(--terra-bright) 50%, var(--teal-bright) 50%);
-  border-radius: 999px;
-}
-.hero-meta {
-  font-family: var(--mono); font-size: 13px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.hero-title {
-  font-family: var(--sans); font-weight: 700;
-  font-size: clamp(36px, 5.6vw, 60px);
-  letter-spacing: -0.022em; line-height: 1.05;
-  color: var(--navy); margin-bottom: 18px;
-}
-.hero-title em { color: var(--terra-text); }
-.hero-subtitle {
-  font-family: var(--reading);
-  font-size: clamp(17px, 1.6vw, 19px);
-  color: var(--ink-soft); max-width: 64ch; line-height: 1.55;
-}
+/* ============ BLOCKS ============ */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
 
-/* ============ COURSE TOOLKIT ============ */
-.toolkit { margin-bottom: 56px; }
-.toolkit-head {
+.block {
+  margin-bottom: 36px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.block:last-child { border-bottom: none; padding-bottom: 0; }
+.block-head {
   display: flex; align-items: baseline; gap: 14px;
-  margin-bottom: 22px; padding-bottom: 12px;
-  border-bottom: 1px solid var(--rule-soft);
-  flex-wrap: wrap;
+  margin-bottom: 18px; flex-wrap: wrap;
 }
-.toolkit-head-title {
+.block-num {
   font-family: var(--sans); font-weight: 700;
-  font-size: 22px; color: var(--navy);
-  letter-spacing: -0.005em;
-}
-.toolkit-head-sub {
-  font-family: var(--sans); font-size: 14px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.toolkit-shutter-list { display: flex; flex-direction: column; gap: 8px; }
-
-.toolkit-shutter {
-  background: white;
-  border: 1px solid var(--rule-soft);
-  overflow: hidden;
-  transition: box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
-}
-.toolkit-shutter:hover { border-color: var(--rule); }
-.toolkit-shutter[data-open="true"] {
-  border-color: var(--navy);
-  box-shadow: var(--shadow-card);
-}
-
-.toolkit-shutter-trigger {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 28px 1fr auto auto;
-  gap: 14px; align-items: center;
-  background: white; border: none;
-  padding: 14px 18px;
-  cursor: pointer;
-  text-align: left;
-  font-family: var(--sans);
-  transition: background 0.2s var(--ease);
-}
-.toolkit-shutter-trigger:hover { background: var(--bg-tint); }
-.toolkit-shutter[data-open="true"] .toolkit-shutter-trigger {
-  background: var(--navy); color: white;
-}
-
-.toolkit-shutter .louvers {
-  width: 24px; height: 24px;
-}
-.toolkit-shutter .louver { height: 3px; }
-
-.toolkit-shutter-name-block { min-width: 0; }
-.toolkit-shutter-name {
-  font-family: var(--sans); font-weight: 700;
-  font-size: 16px; letter-spacing: -0.005em;
-  color: var(--ink); line-height: 1.25; margin-bottom: 2px;
-}
-.toolkit-shutter[data-open="true"] .toolkit-shutter-name { color: white; }
-.toolkit-shutter-sub {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.toolkit-shutter[data-open="true"] .toolkit-shutter-sub { color: var(--gold-bright); }
-
-.toolkit-shutter-count {
-  font-family: var(--mono); font-size: 12px; font-weight: 500;
-  color: var(--ink-muted); font-feature-settings: 'tnum';
-  white-space: nowrap;
-}
-.toolkit-shutter[data-open="true"] .toolkit-shutter-count { color: var(--gold-bright); }
-
-.toolkit-chevron {
-  width: 16px; height: 16px;
-  transition: transform 0.3s var(--ease);
-  color: var(--ink-muted);
-  flex-shrink: 0;
-}
-.toolkit-shutter[data-open="true"] .toolkit-chevron {
-  transform: rotate(180deg);
-  color: white;
-}
-
-.toolkit-shutter-body {
-  display: none;
-  padding: 18px;
-  background: white;
-  border-top: 1px solid var(--rule-faint);
-}
-.toolkit-shutter[data-open="true"] .toolkit-shutter-body { display: block; }
-
-.toolkit-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
-}
-.toolkit-card {
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 14px 16px;
-  background: white;
-  border: 1px solid var(--rule-faint);
-  text-decoration: none; color: var(--ink);
-  transition: all 0.18s var(--ease);
-}
-.toolkit-card:hover {
-  border-color: var(--navy);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
-}
-.toolkit-card-tag-row {
-  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
-}
-.toolkit-card-title {
-  font-family: var(--sans); font-weight: 700; font-size: 15.5px;
-  letter-spacing: -0.005em; line-height: 1.3;
-}
-.toolkit-card-desc {
-  font-family: var(--sans); font-size: 13px; color: var(--ink-soft);
-  line-height: 1.45;
-}
-.toolkit-card-meta {
-  font-family: var(--mono); font-size: 11.5px;
-  color: var(--ink-muted); margin-top: auto;
-  padding-top: 4px;
-  font-feature-settings: 'tnum';
-}
-
-/* ============ MODULE PICKER (Hub view) ============ */
-.picker-section { margin-bottom: 24px; }
-.picker-head {
-  display: flex; align-items: baseline; gap: 14px;
-  margin-bottom: 22px; padding-bottom: 12px;
-  border-bottom: 1px solid var(--rule-soft);
-  flex-wrap: wrap;
-}
-.picker-head-title {
-  font-family: var(--sans); font-weight: 700;
-  font-size: 22px; color: var(--navy);
-  letter-spacing: -0.005em;
-}
-.picker-head-sub {
-  font-family: var(--sans); font-size: 14px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.picker-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 14px;
-}
-.picker-card {
-  display: flex; flex-direction: column;
-  padding: 22px 22px 18px;
-  background: white;
-  border: 1px solid var(--rule-soft);
-  text-decoration: none; color: var(--ink);
-  transition: all 0.2s var(--ease);
-  position: relative;
-  cursor: pointer;
-  text-align: left;
-}
-.picker-card:hover {
-  border-color: var(--navy);
-  box-shadow: var(--shadow-lift);
-  transform: translateY(-2px);
-}
-.picker-card-num-row {
-  display: flex; align-items: baseline; gap: 12px;
-  margin-bottom: 14px;
-}
-.picker-card-num {
-  font-family: var(--mono); font-weight: 700; font-size: 32px;
-  color: var(--gold-text); font-feature-settings: 'tnum';
-  line-height: 1; letter-spacing: -0.01em;
-}
-.picker-card-meta {
-  font-family: var(--mono); font-size: 11.5px;
-  color: var(--ink-muted);
-  margin-left: auto;
-  font-feature-settings: 'tnum';
-}
-.picker-card-title {
-  font-family: var(--sans); font-weight: 700; font-size: 19px;
-  letter-spacing: -0.01em; line-height: 1.25;
-  color: var(--navy);
-  margin-bottom: 10px;
-}
-.picker-card-desc {
-  font-family: var(--reading); font-size: 14.5px;
-  color: var(--ink-soft); line-height: 1.5;
-  margin-bottom: 14px;
-}
-.picker-card-foot {
-  display: flex; align-items: center; justify-content: space-between;
-  padding-top: 12px; border-top: 1px solid var(--rule-faint);
-  margin-top: auto;
-}
-.picker-card-count {
-  font-family: var(--sans); font-size: 13px; font-weight: 600;
-  color: var(--ink-muted);
-}
-.picker-card-arrow {
-  font-family: var(--sans); font-size: 13px; font-weight: 700;
-  color: var(--terra-text);
-  transition: transform 0.2s var(--ease), gap 0.2s var(--ease);
-  display: flex; align-items: center; gap: 6px;
-}
-.picker-card:hover .picker-card-arrow {
-  color: var(--navy); gap: 10px;
-}
-
-/* ============ MODULE VIEW HEADER ============ */
-.module-view-head { margin-bottom: 28px; }
-.breadcrumb {
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--sans); font-size: 13.5px; font-weight: 500;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-}
-.breadcrumb a, .breadcrumb button {
-  color: var(--ink-muted);
-  text-decoration: none;
-  background: transparent; border: none; padding: 0;
-  font: inherit; cursor: pointer;
-  transition: color 0.16s var(--ease);
-}
-.breadcrumb a:hover, .breadcrumb button:hover {
-  color: var(--terra-text);
-  text-decoration: underline;
-}
-.breadcrumb-sep { color: var(--rule); }
-.breadcrumb-current { color: var(--navy); font-weight: 600; }
-
-.module-hero {
-  padding: 8px 0 32px;
-  border-bottom: 1px solid var(--rule-soft);
-}
-.module-hero-num-row {
-  display: flex; align-items: baseline; gap: 16px;
-  margin-bottom: 16px; flex-wrap: wrap;
-}
-.module-hero-num {
-  font-family: var(--mono); font-weight: 700;
-  font-size: 26px; color: var(--gold-text);
+  font-size: 22px; color: var(--gold-text);
   font-feature-settings: 'tnum'; line-height: 1;
 }
-.module-hero-meta {
-  font-family: var(--mono); font-size: 12.5px; font-weight: 500;
-  color: var(--ink-muted);
-  margin-left: auto;
-}
-.module-hero-title {
+.block-title {
   font-family: var(--sans); font-weight: 700;
-  font-size: clamp(28px, 4vw, 42px);
-  letter-spacing: -0.018em; line-height: 1.1;
-  color: var(--navy); margin-bottom: 14px;
+  font-size: clamp(20px, 2.4vw, 24px);
+  letter-spacing: -0.01em; line-height: 1.15;
+  color: var(--navy);
 }
-.module-hero-desc {
-  font-family: var(--reading);
-  font-size: 17px; color: var(--ink-soft);
-  line-height: 1.55; max-width: 64ch;
+.block-helper {
+  font-family: var(--reading); font-size: 14.5px;
+  color: var(--ink-soft); max-width: 64ch; line-height: 1.5;
+  margin-bottom: 16px;
 }
 
-/* ============ CONTROLS ============ */
-.controls {
-  display: grid; grid-template-columns: 1fr; gap: 22px;
-  padding: 22px;
-  background: var(--bg-tint);
-  border: 1px solid var(--rule-faint);
-  margin: 28px 0;
+/* ============ FORMS ============ */
+.form-grid { display: grid; gap: 12px; }
+.form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-grid.cols-3 { grid-template-columns: 2fr 1fr 1fr; }
+@media (max-width: 800px) {
+  .form-grid.cols-2, .form-grid.cols-3 { grid-template-columns: 1fr; }
 }
-@media (min-width: 760px) {
-  .controls.has-1 { grid-template-columns: 1fr; }
-  .controls.has-2 { grid-template-columns: 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  color: var(--ink-muted);
 }
-.control-group { display: flex; flex-direction: column; gap: 10px; }
-.control-label {
-  font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-muted);
+.field-required::after { content: ' *'; color: var(--terra-text); }
+.input, .textarea, .select {
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  background: white;
+  border: 1px solid var(--rule-soft);
+  padding: 9px 12px;
+  color: var(--ink);
+  border-radius: 0;
+  transition: border-color 0.16s var(--ease);
+  width: 100%;
 }
+.input:focus, .textarea:focus, .select:focus {
+  outline: none; border-color: var(--navy);
+}
+.textarea { resize: vertical; min-height: 60px; font-family: var(--reading); }
+
+/* URL field with file pick */
+.url-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px;
+}
+.btn-file {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  background: white; border: 1px solid var(--rule-soft);
+  color: var(--ink-soft); padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.16s var(--ease);
+  white-space: nowrap;
+}
+.btn-file:hover { background: var(--bg-tint); border-color: var(--navy); color: var(--navy); }
+
+/* ============ BUTTONS ============ */
+.btn {
+  font-family: var(--sans); font-size: 13.5px; font-weight: 600;
+  background: var(--navy); color: white; border: 1px solid var(--navy);
+  padding: 10px 18px; cursor: pointer;
+  transition: all 0.16s var(--ease);
+}
+.btn:hover { background: var(--terra-text); border-color: var(--terra-text); }
+.btn-ghost {
+  background: transparent; color: var(--navy);
+}
+.btn-ghost:hover { background: var(--navy); color: white; }
+.btn-sm {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  padding: 7px 12px;
+  background: white; border: 1px solid var(--rule-soft);
+  color: var(--ink-soft); cursor: pointer;
+  transition: all 0.16s var(--ease);
+}
+.btn-sm:hover { background: var(--bg-tint); border-color: var(--navy); color: var(--navy); }
+.btn-danger {
+  color: var(--terra-text); border-color: var(--rule-soft);
+}
+.btn-danger:hover { background: var(--terra-text); border-color: var(--terra-text); color: white; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* ============ CHIPS / SECTION TABS ============ */
 .chip-row { display: flex; flex-wrap: wrap; gap: 0; }
 .chip {
-  font-family: var(--mono); font-size: 12.5px; font-weight: 500;
+  font-family: var(--sans); font-size: 12.5px; font-weight: 500;
   background: white; border: 1px solid var(--rule-soft); border-right-width: 0;
-  color: var(--ink-soft); padding: 9px 14px; cursor: pointer;
-  transition: all 0.16s var(--ease); white-space: nowrap;
+  color: var(--ink-soft); padding: 8px 13px; cursor: pointer;
+  transition: all 0.14s var(--ease); white-space: nowrap;
 }
 .chip:last-child { border-right-width: 1px; }
 .chip:hover { background: var(--bg-tint); color: var(--navy); }
 .chip[aria-pressed="true"] {
-  background: var(--navy); color: white; border-color: var(--navy); font-weight: 500;
+  background: var(--navy); color: white; border-color: var(--navy); font-weight: 600;
 }
 .chip[aria-pressed="true"] + .chip { border-left-color: var(--navy); }
 
-/* ============ AP LEGEND ============ */
-.legend {
-  display: flex; gap: 16px; align-items: center;
-  margin: 0 0 28px 0;
-  padding: 12px 18px;
-  background: var(--bg-tint);
-  border-left: 3px solid var(--navy);
-  flex-wrap: wrap;
-  font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft);
+/* ============ TOOLKIT EDITOR ============ */
+.tk-cat-tabs { display: flex; gap: 0; margin-bottom: 16px; flex-wrap: wrap; }
+.tk-cat-tab {
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  background: white; border: 1px solid var(--rule-soft); border-right-width: 0;
+  color: var(--ink-soft); padding: 9px 14px; cursor: pointer;
+  transition: all 0.14s var(--ease);
+  display: flex; align-items: center; gap: 8px;
 }
-.legend-label { font-weight: 600; color: var(--navy); }
-.legend-item { display: flex; align-items: center; gap: 7px; }
-.legend-tag {
-  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
-  color: white; padding: 3px 9px; border-radius: 999px;
+.tk-cat-tab:last-child { border-right-width: 1px; }
+.tk-cat-tab:hover { background: var(--bg-tint); }
+.tk-cat-tab.active {
+  background: var(--navy); color: white; border-color: var(--navy); font-weight: 600;
 }
-.legend-tag.tag-anat { background: var(--terra-text); }
-.legend-tag.tag-phys { background: var(--teal-text); }
+.tk-cat-tab-count {
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  color: var(--ink-muted); background: var(--bg-tint); padding: 2px 7px;
+  border-radius: 999px;
+}
+.tk-cat-tab.active .tk-cat-tab-count {
+  background: rgba(255,255,255,0.14); color: var(--gold-bright);
+}
 
-/* ============ MODULE TOOLS STRIP ============ */
-.module-tools {
-  margin-bottom: 28px;
+/* ============ ENTRY LIST ============ */
+.entry-list {
+  display: flex; flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
 }
-.module-tools-head {
-  display: flex; align-items: baseline; gap: 12px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--rule-faint);
-  flex-wrap: wrap;
-}
-.module-tools-title {
-  font-family: var(--sans); font-weight: 700; font-size: 16px;
-  color: var(--navy);
-}
-.module-tools-sub {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.module-tools-grid {
+.entry {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-}
-.module-tool {
-  display: flex; flex-direction: column; gap: 6px;
+  grid-template-columns: 1fr auto;
+  gap: 12px; align-items: start;
   padding: 12px 14px;
   background: white;
   border: 1px solid var(--rule-faint);
-  text-decoration: none; color: var(--ink);
-  transition: all 0.16s var(--ease);
 }
-.module-tool:hover {
+.entry-body { min-width: 0; }
+.entry-tags {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;
+}
+.entry-tag {
+  font-family: var(--sans); font-size: 10px; font-weight: 500;
+  color: white; padding: 2px 8px; border-radius: 999px;
+}
+.entry-tag.tag-aitool { background: var(--gold-text); }
+.entry-tag.tag-kahoot { background: var(--plum-text); }
+.entry-tag.tag-practice, .entry-tag.tag-quiz, .entry-tag.tag-worksheet { background: var(--ink-muted); }
+.entry-tag.tag-admin { background: var(--admin-text); }
+.entry-tag.tag-lab { background: var(--terra-text); }
+.entry-tag.tag-case { background: var(--teal-text); }
+.entry-tag.tag-reading, .entry-tag.tag-video, .entry-tag.tag-notes,
+.entry-tag.tag-atlas, .entry-tag.tag-tool { background: var(--ink-muted); }
+.entry-tag.tag-anat { background: var(--terra-text); }
+.entry-tag.tag-phys { background: var(--teal-text); }
+.entry-dok {
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  color: var(--navy); padding: 1px 7px;
+  border: 1px solid var(--navy); border-radius: 999px;
+  background: white;
+}
+.entry-title {
+  font-family: var(--sans); font-weight: 700; font-size: 14.5px;
+  letter-spacing: -0.005em; line-height: 1.3; margin-bottom: 2px;
+}
+.entry-desc {
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-soft);
+  line-height: 1.4; margin-bottom: 3px;
+}
+.entry-meta {
+  font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted);
+}
+.entry-link {
+  font-family: var(--sans); font-size: 11.5px; color: var(--terra-text);
+  text-decoration: underline; word-break: break-all;
+}
+.entry-actions {
+  display: flex; gap: 4px; align-items: flex-start;
+}
+.icon-btn {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  background: transparent; border: none;
+  color: var(--ink-muted); cursor: pointer;
+  padding: 3px 6px;
+  transition: color 0.14s var(--ease);
+}
+.icon-btn:hover { color: var(--terra-text); }
+
+/* ============ MODULE & TOPIC ACCORDIONS ============ */
+.mod-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.mod-item, .topic-item {
+  background: white; border: 1px solid var(--rule-soft);
+  overflow: hidden;
+}
+.mod-item[data-open="true"], .topic-item[data-open="true"] {
   border-color: var(--navy);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
 }
-.module-tool-tag-row {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+.mod-trigger, .topic-trigger {
+  width: 100%; display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px; align-items: center;
+  background: white; border: none;
+  padding: 12px 16px; cursor: pointer;
+  text-align: left; font-family: var(--sans);
 }
-.module-tool-title {
-  font-family: var(--sans); font-size: 14px;
-  font-weight: 600; line-height: 1.3;
-  letter-spacing: -0.005em;
+.mod-item[data-open="true"] .mod-trigger,
+.topic-item[data-open="true"] .topic-trigger {
+  background: var(--navy); color: white;
 }
-.module-tool-meta {
-  font-family: var(--mono); font-size: 11.5px;
+.mod-trigger:hover, .topic-trigger:hover { background: var(--bg-tint); }
+.mod-item[data-open="true"] .mod-trigger:hover,
+.topic-item[data-open="true"] .topic-trigger:hover { background: var(--navy-mid); }
+
+.mod-num {
+  font-family: var(--sans); font-weight: 700; font-size: 16px;
+  color: var(--gold-text); font-feature-settings: 'tnum';
+  min-width: 24px;
+}
+.mod-item[data-open="true"] .mod-num { color: var(--gold-bright); }
+.mod-name, .topic-name {
+  font-family: var(--sans); font-weight: 700; font-size: 14.5px;
+  letter-spacing: -0.005em; line-height: 1.2;
+}
+.mod-meta, .topic-sub {
+  font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted);
+  font-weight: 500;
+}
+.mod-item[data-open="true"] .mod-meta,
+.topic-item[data-open="true"] .topic-sub { color: var(--gold-bright); }
+.chev {
+  width: 14px; height: 14px;
+  transition: transform 0.25s var(--ease);
   color: var(--ink-muted);
-  font-feature-settings: 'tnum';
+}
+.mod-item[data-open="true"] .chev,
+.topic-item[data-open="true"] .chev { transform: rotate(180deg); color: white; }
+
+.mod-body, .topic-body {
+  display: none; padding: 16px;
+  background: var(--bg-tint);
+  border-top: 1px solid var(--rule-faint);
+}
+.mod-item[data-open="true"] .mod-body { display: block; }
+.topic-item[data-open="true"] .topic-body { display: block; }
+
+.topic-list {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 14px;
+}
+.topic-list .topic-item {
+  background: white;
 }
 
-/* ============ TOPICS HEADER ============ */
-.topics-head {
-  display: flex; align-items: baseline; gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--rule-soft);
-  flex-wrap: wrap;
+/* ============ EMPTY STATE ============ */
+.empty {
+  font-family: var(--reading); font-size: 13px;
+  color: var(--ink-muted); font-style: italic;
+  text-align: center; padding: 18px;
+  border: 1px dashed var(--rule-soft);
+  background: white;
 }
-.topics-head-title {
+
+/* ============ FILE PREVIEW BADGE ============ */
+.file-loaded {
+  font-family: var(--sans); font-size: 11.5px; font-weight: 500;
+  color: var(--ink-muted);
+  background: var(--bg-tint);
+  padding: 6px 10px;
+  border: 1px solid var(--rule-soft);
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 6px;
+}
+.file-loaded strong { color: var(--navy); font-weight: 600; }
+
+/* ============ SUB-HEADERS INSIDE BLOCKS ============ */
+.sub-head {
+  font-family: var(--sans); font-weight: 700; font-size: 14.5px;
+  color: var(--navy); margin: 16px 0 8px;
+}
+
+/* ============ PREVIEW TAB ============ */
+.preview-frame {
+  width: 100%; min-height: 800px;
+  border: 1px solid var(--rule-soft);
+  background: white;
+  display: block;
+}
+
+/* ============ EXPORT TAB ============ */
+.export-prose {
+  font-family: var(--reading); font-size: 14.5px;
+  color: var(--ink-soft); line-height: 1.55;
+  max-width: 64ch; margin-bottom: 18px;
+}
+.export-prose strong { color: var(--navy); font-weight: 700; }
+.export-prose code {
+  font-family: 'Plus Jakarta Sans', monospace; font-size: 13px;
+  background: var(--bg-tint); padding: 2px 6px;
+  color: var(--terra-text);
+}
+.export-output {
+  font-family: 'Plus Jakarta Sans', monospace; font-size: 11px;
+  background: var(--navy); color: var(--gold-bright);
+  padding: 18px; max-height: 280px;
+  overflow: auto; margin-top: 12px;
+  white-space: pre; line-height: 1.55;
+}
+
+/* ============ MODAL (bulk add) ============ */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(10, 19, 34, 0.55);
+  display: none; align-items: flex-start; justify-content: center;
+  z-index: 100; padding: 60px 20px 20px;
+  overflow: auto;
+}
+.modal-backdrop.active { display: flex; }
+.modal {
+  background: white;
+  width: 100%; max-width: 600px;
+  padding: 22px 24px;
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-lift);
+}
+.modal-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--rule-soft);
+}
+.modal-title {
   font-family: var(--sans); font-weight: 700; font-size: 18px;
   color: var(--navy); letter-spacing: -0.005em;
 }
-.topics-head-sub {
-  font-family: var(--sans); font-size: 13px; font-weight: 500;
-  color: var(--ink-muted);
+.modal-close {
+  background: transparent; border: none;
+  font-family: var(--sans); font-size: 22px;
+  color: var(--ink-muted); cursor: pointer;
+  line-height: 1; padding: 0 6px;
+}
+.modal-close:hover { color: var(--terra-text); }
+.modal-body { margin-bottom: 14px; }
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding-top: 14px; border-top: 1px solid var(--rule-soft);
 }
 
-/* ============ SHUTTER ============ */
-.shutter-list { display: flex; flex-direction: column; gap: 10px; }
+.hidden { display: none !important; }
 
-.shutter {
-  background: white;
-  border: 1px solid var(--rule-soft);
-  overflow: hidden;
-  transition: box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
-}
-.shutter:hover { border-color: var(--rule); }
-.shutter[data-open="true"] {
-  border-color: var(--navy);
-  box-shadow: var(--shadow-lift);
-}
-
-.shutter-trigger-row {
-  display: grid;
-  grid-template-columns: 36px 1fr auto;
-  gap: 16px; align-items: center;
-  background: white;
-  padding: 16px 22px;
-  transition: background 0.2s var(--ease);
-}
-.shutter[data-open="true"] .shutter-trigger-row {
-  background: var(--navy); color: white;
-}
-
-.louvers {
-  width: 28px; height: 28px;
-  display: flex; flex-direction: column; justify-content: space-between;
-  padding: 4px 2px;
-  border: 1.5px solid var(--ink-muted);
-  background: var(--bg-tint);
-  transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
-  flex-shrink: 0;
-}
-.shutter[data-open="true"] .louvers,
-.toolkit-shutter[data-open="true"] .louvers {
-  border-color: white; background: var(--navy-mid);
-}
-.louver {
-  height: 4px; background: var(--ink-muted);
-  transform-origin: center;
-  transition: transform 0.4s var(--ease), background 0.2s var(--ease);
-}
-.shutter[data-open="true"] .louver,
-.toolkit-shutter[data-open="true"] .louver { background: var(--gold-bright); }
-.shutter[data-open="true"] .louver:nth-child(1),
-.toolkit-shutter[data-open="true"] .louver:nth-child(1) { transform: rotateX(72deg); }
-.shutter[data-open="true"] .louver:nth-child(2),
-.toolkit-shutter[data-open="true"] .louver:nth-child(2) { transform: rotateX(72deg); transition-delay: 0.05s; }
-.shutter[data-open="true"] .louver:nth-child(3),
-.toolkit-shutter[data-open="true"] .louver:nth-child(3) { transform: rotateX(72deg); transition-delay: 0.10s; }
-
-.shutter-title-block { min-width: 0; }
-.shutter-title {
-  font-family: var(--sans); font-weight: 700;
-  font-size: 17.5px; letter-spacing: -0.005em;
-  color: var(--ink); line-height: 1.25; margin-bottom: 3px;
-}
-.shutter[data-open="true"] .shutter-title { color: white; }
-.shutter-sub {
-  font-family: var(--mono); font-size: 12px; font-weight: 500;
-  color: var(--ink-muted);
-}
-.shutter[data-open="true"] .shutter-sub { color: var(--gold-bright); }
-
-/* ============ R/H/O/A CIRCLE TRIGGERS ============ */
-.shutter-circles {
-  display: flex; gap: 8px;
-  flex-shrink: 0;
-}
-.circle-btn {
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  font-family: var(--sans);
-  color: white;
-  padding: 0;
-  transition: all 0.18s var(--ease);
-  position: relative;
-  flex-shrink: 0;
-}
-.circle-btn[data-circle="required"]    { background: var(--terra-text); }
-.circle-btn[data-circle="recommended"] { background: var(--gold-text); }
-.circle-btn[data-circle="optional"]    { background: var(--navy-mid); }
-.circle-btn[data-circle="refresher"]   { background: var(--teal-text); }
-
-.circle-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card);
-}
-
-.circle-btn[aria-pressed="true"] {
-  border-color: var(--gold-bright);
-  box-shadow: 0 0 0 3px white, 0 0 0 5px var(--gold-bright), var(--shadow-card);
-}
-.shutter[data-open="true"] .circle-btn[aria-pressed="true"] {
-  box-shadow: 0 0 0 3px var(--navy), 0 0 0 5px var(--gold-bright), var(--shadow-card);
-}
-
-.circle-letter {
-  font-size: 17px; font-weight: 700;
-  line-height: 1;
-}
-.circle-count {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  margin-top: 2px; opacity: 0.85;
-  font-feature-settings: 'tnum';
-  line-height: 1;
-}
-
-/* ============ SHUTTER BODY (single column) ============ */
-.shutter-body {
-  display: none;
-  padding: 26px 24px 28px;
-  background: white;
-  border-top: 1px solid var(--rule-faint);
-}
-.shutter[data-open="true"] .shutter-body { display: block; }
-
-.section-region {
-  padding-left: 16px;
-  border-left: 4px solid var(--rule-soft);
-}
-.section-region.region-required    { border-left-color: var(--terra-text); }
-.section-region.region-recommended { border-left-color: var(--gold-text); }
-.section-region.region-optional    { border-left-color: var(--navy-mid); }
-.section-region.region-refresher   { border-left-color: var(--teal-text); }
-
-.section-head {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 12px; padding-bottom: 12px; margin-bottom: 14px;
-  border-bottom: 1px solid var(--rule-faint);
-  flex-wrap: wrap;
-}
-.section-name {
-  font-family: var(--sans); font-size: 18px; font-weight: 700;
-  letter-spacing: -0.005em; line-height: 1.2;
-}
-.section-region.region-required    .section-name { color: var(--terra-text); }
-.section-region.region-recommended .section-name { color: var(--gold-text); }
-.section-region.region-optional    .section-name { color: var(--navy); }
-.section-region.region-refresher   .section-name { color: var(--teal-text); }
-
-.section-helper {
-  font-family: var(--reading); font-size: 14px;
-  color: var(--ink-soft); font-style: italic;
-  margin-left: auto;
-}
-
-.section-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
-}
-.section-empty {
-  font-family: var(--reading); font-size: 14px;
-  color: var(--ink-muted); font-style: italic;
-  padding: 16px 0;
-}
-
-/* ============ RESOURCE CARD ============ */
-.res {
-  display: flex; flex-direction: column; gap: 6px;
-  padding: 12px 14px;
-  background: white;
-  border: 1px solid var(--rule-faint);
-  text-decoration: none; color: var(--ink);
-  transition: all 0.18s var(--ease);
-}
-.res:hover {
-  border-color: var(--navy);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
-}
-.res-tag-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-
-.res-tag {
-  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
-  color: white; padding: 3px 9px; border-radius: 999px;
-  font-feature-settings: 'tnum';
-}
-.res-tag.tag-reading,
-.res-tag.tag-video,
-.res-tag.tag-notes,
-.res-tag.tag-atlas,
-.res-tag.tag-tool,
-.res-tag.tag-worksheet,
-.res-tag.tag-quiz,
-.res-tag.tag-practice {
-  background: var(--ink-muted);
-}
-.res-tag.tag-lab        { background: var(--terra-text); }
-.res-tag.tag-case       { background: var(--teal-text); }
-.res-tag.tag-aitool     { background: var(--gold-text); }
-.res-tag.tag-kahoot     { background: var(--plum-text); }
-.res-tag.tag-assignment { background: var(--slate-text); }
-.res-tag.tag-admin      { background: var(--admin-text); }
-.res-tag.tag-anat       { background: var(--terra-text); }
-.res-tag.tag-phys       { background: var(--teal-text); }
-
-.dok-badge {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  color: var(--navy);
-  padding: 2px 8px;
-  border: 1px solid var(--navy);
-  border-radius: 999px;
-  background: white;
-  letter-spacing: 0.01em;
-  font-feature-settings: 'tnum';
-}
-
-.res-title {
-  font-family: var(--sans); font-weight: 600; font-size: 14.5px;
-  line-height: 1.35; letter-spacing: -0.005em;
-}
-.res-meta {
-  font-family: var(--mono); font-size: 11.5px;
-  color: var(--ink-muted); font-feature-settings: 'tnum';
-}
-.res-arrow {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
-  color: var(--terra-text); margin-top: 2px;
-}
-.res:hover .res-arrow { color: var(--navy); }
-
-/* ============ CIRCLE LEGEND ============ */
-.circle-legend {
-  display: flex; gap: 18px; align-items: center;
-  flex-wrap: wrap;
+/* ============ QUICK START BAR ============ */
+.quickstart {
+  display: flex; align-items: center; gap: 14px;
   padding: 14px 18px;
-  background: var(--bg-tint);
-  border-left: 3px solid var(--gold-text);
-  margin-bottom: 18px;
-  font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft);
+  background: #FAF6EC;
+  border: 1px solid var(--gold);
+  border-left: 4px solid var(--gold-text);
+  margin-bottom: 14px; flex-wrap: wrap;
 }
-.circle-legend-label { font-weight: 600; color: var(--navy); }
-.circle-legend-item {
-  display: inline-flex; align-items: center; gap: 7px;
+.quickstart-label {
+  font-family: var(--sans); font-size: 13.5px; font-weight: 600;
+  color: var(--gold-text);
 }
-.circle-legend-dot {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-family: var(--sans); font-weight: 700; font-size: 11px;
-  color: white;
-  flex-shrink: 0;
+.quickstart-text {
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  color: var(--ink-soft);
+  display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
-.circle-legend-dot[data-circle="required"]    { background: var(--terra-text); }
-.circle-legend-dot[data-circle="recommended"] { background: var(--gold-text); }
-.circle-legend-dot[data-circle="optional"]    { background: var(--navy-mid); }
-.circle-legend-dot[data-circle="refresher"]   { background: var(--teal-text); }
-
-/* ============ FOOTER NOTE ============ */
-.footer-note {
-  margin-top: 56px; padding: 22px;
-  background: var(--navy); color: white;
-  font-family: var(--reading); font-size: 14px; line-height: 1.65;
+.qs-num {
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  background: white; border: 1px solid var(--gold); color: var(--ink);
+  padding: 6px 8px; width: 64px; text-align: center;
+  font-feature-settings: 'tnum';
 }
-.footer-note h3 {
-  font-family: var(--sans); font-weight: 700; color: var(--gold-bright);
-  font-size: 14px; margin-bottom: 10px;
+.qs-num:focus { outline: none; border-color: var(--navy); }
+.btn-qs {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  background: var(--gold-text); color: white; border: 1px solid var(--gold-text);
+  padding: 8px 16px; cursor: pointer;
+  margin-left: auto;
+  transition: all 0.16s var(--ease);
 }
-.footer-note .ftn-row { margin-bottom: 6px; }
-.footer-note .ftn-row:last-child { margin-bottom: 0; }
-.footer-note strong { font-family: var(--sans); font-weight: 700; }
-
-/* ============ RESPONSIVE ============ */
-@media (max-width: 720px) {
-  .app { padding: 22px 22px 64px; }
-  .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .shutter-trigger-row { grid-template-columns: 28px 1fr; padding: 14px 16px; gap: 12px; }
-  .shutter-circles {
-    grid-column: 2;
-    margin-top: 10px;
-    justify-content: flex-start;
-  }
-  .module-hero-meta { width: 100%; margin-left: 0; }
-  .course-tab { padding: 10px 14px; font-size: 13.5px; }
-  .picker-grid { grid-template-columns: 1fr; }
-  .toolkit-grid { grid-template-columns: 1fr; }
-  .circle-btn { width: 42px; height: 42px; }
-  .circle-letter { font-size: 15px; }
-}
-
-/* ============ VIEW VISIBILITY ============ */
-.view { display: none; }
-.view.active { display: block; }
+.btn-qs:hover { background: var(--navy); border-color: var(--navy); }
 </style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
-<div class="app">
+<div class="builder-app">
   <header class="topbar">
     <div class="brand">
-      <span class="brand-mark">Course<em>Hub</em></span>
-      <span class="brand-tag">Dr. Sharilyn Rennie</span>
+      <span class="brand-mark">Hub<em>Builder</em></span>
+      <span class="brand-tag">v0.4 Generator · Dr. Sharilyn Rennie</span>
     </div>
-    <span class="proto-pill" aria-label="Prototype version">Prototype v0.4</span>
+    <span class="proto-pill">Builder · MVP</span>
   </header>
 
-  <nav class="course-tabs" aria-label="Select a course">
-    <button class="course-tab active" data-course="anatomy" aria-pressed="true">
-      Anatomy <span class="course-tab-code">BIO 004</span>
-    </button>
-    <button class="course-tab" data-course="ap" aria-pressed="false">
-      Anatomy &amp; Physiology <span class="course-tab-code">BIO 431</span>
-    </button>
-    <button class="course-tab" data-course="physiology" aria-pressed="false">
-      Physiology <span class="course-tab-code">BIO 005</span>
-    </button>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="edit" role="tab" aria-selected="true">Edit</button>
+    <button class="tab" data-tab="preview" role="tab" aria-selected="false">Preview</button>
+    <button class="tab" data-tab="export" role="tab" aria-selected="false">Export</button>
   </nav>
 
   <main id="main" tabindex="-1">
-    <!-- ============ HUB VIEW ============ -->
-    <div class="view active" id="view-hub">
-      <section class="hero">
-        <div class="hero-pills">
-          <span class="hero-type-pill" id="hero-type" data-type="anatomy">Anatomy course</span>
-          <span class="hero-meta" id="hero-meta">BIO 004 · Summer 2026</span>
-        </div>
-        <h1 class="hero-title" id="hero-title">Human <em>Anatomy</em></h1>
-        <p class="hero-subtitle" id="hero-sub">Eight modules. One body. Pick a module to dive into its topics.</p>
-      </section>
 
-      <div id="toolkit-host"></div>
+    <!-- ============ EDIT TAB ============ -->
+    <div class="tab-pane active" id="pane-edit">
 
-      <section class="picker-section" aria-labelledby="picker-title">
-        <header class="picker-head">
-          <h2 class="picker-head-title" id="picker-title">Modules</h2>
-          <span class="picker-head-sub" id="picker-sub">Choose a module to see its topics and resources</span>
+      <!-- BLOCK 01: Course identity -->
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">01</span>
+          <h2 class="block-title">Course identity</h2>
         </header>
-        <div class="picker-grid" id="picker-grid"></div>
-      </section>
-    </div>
+        <p class="block-helper">Choose the course type. The hub adapts: Anatomy and Physiology each get 3 sections (R, H, O), Physiology adds a 4th (Anatomy refresher), and Anatomy &amp; Physiology adds an Anat/Phys filter and tags every resource.</p>
 
-    <!-- ============ MODULE VIEW ============ -->
-    <div class="view" id="view-module">
-      <div class="module-view-head">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <button type="button" id="breadcrumb-back">Back to all modules</button>
-          <span class="breadcrumb-sep" aria-hidden="true">/</span>
-          <span class="breadcrumb-current" id="breadcrumb-current">Module</span>
-        </nav>
-
-        <header class="module-hero">
-          <div class="module-hero-num-row">
-            <span class="module-hero-num" id="mod-hero-num">01</span>
-            <span class="module-hero-meta" id="mod-hero-meta"></span>
+        <div class="form-grid cols-2">
+          <div class="field">
+            <label class="field-label field-required" for="f-type">Course type</label>
+            <select class="select" id="f-type">
+              <option value="anatomy">Anatomy (3 sections)</option>
+              <option value="physiology">Physiology (4 sections, includes Anatomy refresher)</option>
+              <option value="ap">Anatomy &amp; Physiology (3 sections + Anat/Phys filter)</option>
+            </select>
           </div>
-          <h1 class="module-hero-title" id="mod-hero-title">Module Title</h1>
-          <p class="module-hero-desc" id="mod-hero-desc"></p>
+          <div class="field">
+            <label class="field-label field-required" for="f-organization">Organize by</label>
+            <select class="select" id="f-organization">
+              <option value="modules">Modules (e.g., Module 01, Module 02)</option>
+              <option value="weeks">Weeks (e.g., Week 1, Week 2)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label field-required" for="f-code">Course code</label>
+            <input class="input" id="f-code" placeholder="BIO 004">
+          </div>
+          <div class="field">
+            <label class="field-label field-required" for="f-term">Term</label>
+            <input class="input" id="f-term" placeholder="Summer 2026">
+          </div>
+          <div class="field">
+            <label class="field-label field-required" for="f-title">Course name (title)</label>
+            <input class="input" id="f-title" placeholder="Human Anatomy">
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top: 12px;">
+          <div class="field">
+            <label class="field-label" for="f-subtitle">Tagline / subtitle (optional)</label>
+            <textarea class="textarea" id="f-subtitle" placeholder="Eight modules. One body. Pick a module to dive into its topics."></textarea>
+          </div>
+        </div>
+        <div class="form-grid cols-2" style="margin-top: 12px;">
+          <div class="field">
+            <label class="field-label" for="f-instructor">Instructor</label>
+            <input class="input" id="f-instructor" placeholder="Dr. Sharilyn Rennie">
+          </div>
+          <div class="field">
+            <label class="field-label" for="f-institution">Institution (optional)</label>
+            <input class="input" id="f-institution" placeholder="Solano Community College">
+          </div>
+        </div>
+      </section>
+
+      <!-- BLOCK 02: Course toolkit -->
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">02</span>
+          <h2 class="block-title">Course toolkit</h2>
         </header>
-      </div>
+        <p class="block-helper">Pick a category, add resources. Categories you don't fill stay hidden in the published hub. Use Bulk paste for many URLs at once.</p>
 
-      <div class="controls" id="controls"></div>
-      <div id="legend-host"></div>
-
-      <div id="module-tools-host"></div>
-
-      <section aria-labelledby="topics-title">
-        <header class="topics-head">
-          <h2 class="topics-head-title" id="topics-title">Topics in this module</h2>
-          <span class="topics-head-sub">Click any colored circle to see those resources</span>
-        </header>
-
-        <div class="circle-legend" role="note" aria-label="Circle key">
-          <span class="circle-legend-label">What the circles mean:</span>
-          <span class="circle-legend-item">
-            <span class="circle-legend-dot" data-circle="required" aria-hidden="true">R</span>
-            Required
-          </span>
-          <span class="circle-legend-item">
-            <span class="circle-legend-dot" data-circle="recommended" aria-hidden="true">H</span>
-            Highly recommended
-          </span>
-          <span class="circle-legend-item">
-            <span class="circle-legend-dot" data-circle="optional" aria-hidden="true">O</span>
-            Optional
-          </span>
-          <span class="circle-legend-item" id="circle-legend-refresher" hidden>
-            <span class="circle-legend-dot" data-circle="refresher" aria-hidden="true">A</span>
-            Anatomy refresher
-          </span>
+        <div class="tk-cat-tabs" role="tablist" aria-label="Toolkit category">
+          <button class="tk-cat-tab active" data-tk-cat="ai" role="tab" aria-selected="true">AI Tools <span class="tk-cat-tab-count" data-cat-count="ai">0</span></button>
+          <button class="tk-cat-tab" data-tk-cat="practice" role="tab" aria-selected="false">Practice <span class="tk-cat-tab-count" data-cat-count="practice">0</span></button>
+          <button class="tk-cat-tab" data-tk-cat="games" role="tab" aria-selected="false">Games <span class="tk-cat-tab-count" data-cat-count="games">0</span></button>
+          <button class="tk-cat-tab" data-tk-cat="admin" role="tab" aria-selected="false">Admin <span class="tk-cat-tab-count" data-cat-count="admin">0</span></button>
         </div>
 
-        <div class="shutter-list" id="topics-list"></div>
+        <div id="tk-form-host"></div>
+        <div class="entry-list" id="tk-list"></div>
+      </section>
+
+      <!-- BLOCK 03: Modules and topics -->
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">03</span>
+          <h2 class="block-title" id="block03-title">Modules and topics</h2>
+        </header>
+        <p class="block-helper" id="block03-helper">Each module has its own topics. Each topic has resources sorted into Required (R), Highly recommended (H), Optional (O), and for Physiology, Anatomy refresher (A). Empty modules and topics don't appear in the published hub.</p>
+
+        <div class="quickstart">
+          <span class="quickstart-label" id="qs-label">Quick start</span>
+          <span class="quickstart-text">Create
+            <input type="number" class="qs-num" id="qs-count" min="1" max="40" value="8">
+            empty <span id="qs-unit-text">modules</span> at once
+          </span>
+          <button class="btn-qs" id="btn-qs-generate">Generate</button>
+        </div>
+
+        <div class="toolbar" style="margin-top: 0; margin-bottom: 14px;">
+          <button class="btn" id="btn-add-module">+ Add module</button>
+          <button class="btn-sm" id="btn-load-demo">Load demo content</button>
+        </div>
+
+        <div class="mod-list" id="mod-list"></div>
+      </section>
+
+    </div>
+
+    <!-- ============ PREVIEW TAB ============ -->
+    <div class="tab-pane" id="pane-preview">
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">04</span>
+          <h2 class="block-title">Preview</h2>
+        </header>
+        <p class="block-helper">This is a live render of the hub from your current configuration. Empty sections hide automatically. Switch back to Edit any time.</p>
+        <iframe class="preview-frame" id="preview-frame" title="Hub preview"></iframe>
       </section>
     </div>
 
-    <div class="footer-note">
-      <h3>How navigation works</h3>
-      <div class="ftn-row"><strong>Step 1.</strong> Pick your course at the top (Anatomy, A&amp;P, Physiology).</div>
-      <div class="ftn-row"><strong>Step 2.</strong> The hub page shows the course toolkit (admin, study tools, practice, projects) and a grid of modules. Click a module.</div>
-      <div class="ftn-row"><strong>Step 3.</strong> The module page shows its topics. Each topic has colored circles: R (required), H (highly recommended), O (optional), and A (anatomy refresher, Physiology only). Click a circle to see those resources for that topic.</div>
+    <!-- ============ EXPORT TAB ============ -->
+    <div class="tab-pane" id="pane-export">
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">05</span>
+          <h2 class="block-title">Download &amp; deploy</h2>
+        </header>
+        <p class="export-prose">
+          One self-contained <code>.html</code> file with everything baked in. Upload to Kajabi as a custom HTML embed, host on GitHub Pages, or email it to a colleague. No build step, no dependencies, just a file.
+        </p>
+        <div class="toolbar">
+          <button class="btn" id="btn-download">↓ Download hub HTML</button>
+          <button class="btn btn-ghost" id="btn-copy-html">Copy HTML</button>
+        </div>
+      </section>
+
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">06</span>
+          <h2 class="block-title">Save your work</h2>
+        </header>
+        <p class="export-prose">
+          The builder doesn't auto-save yet. Download a config JSON to come back later. Reload it any time, even after closing the tab.
+        </p>
+        <div class="toolbar">
+          <button class="btn-sm" id="btn-save-config">↓ Save config (JSON)</button>
+          <button class="btn-sm" id="btn-load-config">↑ Load config (JSON)</button>
+          <input type="file" id="config-file-input" accept=".json" class="hidden">
+        </div>
+      </section>
+
+      <section class="block">
+        <header class="block-head">
+          <span class="block-num">07</span>
+          <h2 class="block-title">Generated file preview</h2>
+        </header>
+        <p class="export-prose">First 1500 characters of the file you'll download.</p>
+        <pre class="export-output" id="export-output">Click "Download hub HTML" to generate.</pre>
+      </section>
     </div>
+
   </main>
 </div>
 
+<!-- ============ BULK ADD MODAL ============ -->
+<div class="modal-backdrop" id="modal-bulk" role="dialog" aria-labelledby="modal-bulk-title" aria-modal="true">
+  <div class="modal">
+    <header class="modal-head">
+      <h3 class="modal-title" id="modal-bulk-title">Bulk paste URLs</h3>
+      <button class="modal-close" id="modal-bulk-close" aria-label="Close">×</button>
+    </header>
+    <div class="modal-body">
+      <p class="block-helper" style="margin-bottom: 8px;">One URL per line. Optionally add <code>| Title</code> after the URL.</p>
+      <textarea class="textarea" id="bulk-textarea" rows="8" placeholder="https://example.com/file1.pdf | Module 1 lecture slides
+https://example.com/file2.pdf
+https://example.com/quiz | Module 2 review quiz"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" id="modal-bulk-cancel">Cancel</button>
+      <button class="btn" id="modal-bulk-add">Add all</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="hidden-file-picker" class="hidden">
+<input type="file" id="hidden-file-picker-multi" class="hidden" multiple>
+
 <script>
 // ============================================
-// TYPE LABELS & TAG CLASSES
+// TYPE LABELS & CATEGORIES
 // ============================================
 const TYPE_LABELS = {
   reading: 'Reading', video: 'Video', lab: 'Lab', tool: 'Tool',
@@ -978,771 +720,1445 @@ const TYPE_LABELS = {
   worksheet: 'Worksheet', kahoot: 'Kahoot',
   assignment: 'Assignment', admin: 'Admin'
 };
-const TYPE_TAG_CLASS = {
-  reading: 'tag-reading', video: 'tag-video', lab: 'tag-lab', tool: 'tag-tool',
-  aitool: 'tag-aitool', practice: 'tag-practice', case: 'tag-case',
-  atlas: 'tag-atlas', quiz: 'tag-quiz', notes: 'tag-notes',
-  worksheet: 'tag-worksheet', kahoot: 'tag-kahoot',
-  assignment: 'tag-assignment', admin: 'tag-admin'
-};
 
-const SECTION_META = {
-  required:    { letter: 'R', label: 'Required',           helper: 'Do these to pass' },
-  recommended: { letter: 'H', label: 'Highly recommended', helper: 'Do these to thrive' },
-  optional:    { letter: 'O', label: 'Optional',           helper: 'Go deeper if curious' },
-  refresher:   { letter: 'A', label: 'Anatomy refresher',  helper: 'Remedial structural review' }
-};
-
-function formatDOK(dok) {
-  if (dok === undefined || dok === null || dok === '') return '';
-  const s = String(dok).replace(/\s/g, '');
-  if (s === '1-4' || s === 'all' || s === 'All') return 'DOK 1-4';
-  if (s.includes(',')) return 'DOK ' + s.split(',').join('/');
-  return 'DOK ' + s;
-}
-
-// ============================================
-// SAMPLE RESOURCES
-// ============================================
-function sampleResources(systemName) {
-  return {
-    required: [
-      { title: `${systemName}: lecture slides`,    type: 'reading',  apType: 'anatomy', time: '20 min read' },
-      { title: `Lab manual chapter`,                type: 'lab',      apType: 'anatomy', time: 'In lab' },
-      { title: `Lab exam topic checklist`,          type: 'practice', apType: 'anatomy', time: '5 min', dok: '1' }
-    ],
-    recommended: [
-      { title: `${systemName} concept viewer`,      type: 'tool',     apType: 'anatomy', time: 'Self-paced' },
-      { title: `Visible Body walkthrough`,          type: 'atlas',    apType: 'anatomy', time: '15 min' },
-      { title: `${systemName} Kahoot review`,       type: 'kahoot',   apType: 'anatomy', time: '15 questions', dok: '1,2' },
-      { title: `${systemName} AI tutor`,            type: 'aitool',   apType: 'anatomy', time: 'Conversational' }
-    ],
-    optional: [
-      { title: `Khan Academy: ${systemName}`,       type: 'video',    apType: 'anatomy', time: '~30 min' },
-      { title: `Cadaver dissection clip`,           type: 'video',    apType: 'anatomy', time: '8 min' },
-      { title: `Clinical correlation reading`,      type: 'reading',  apType: 'anatomy', time: 'Brief' },
-      { title: `${systemName} DOK 3 challenge set`, type: 'practice', apType: 'anatomy', time: '8 questions', dok: '3' }
-    ]
-  };
-}
-function samplePhysResources(systemName) {
-  return {
-    required: [
-      { title: `${systemName} physiology lecture`,   type: 'reading',   apType: 'physiology', time: '25 min' },
-      { title: `Concept viewer: function & control`, type: 'tool',      apType: 'physiology', time: 'Self-paced' },
-      { title: `Calculation practice set`,           type: 'worksheet', apType: 'physiology', time: '15 min', dok: '2' }
-    ],
-    recommended: [
-      { title: `Clinical case walkthrough`,          type: 'case',      apType: 'physiology', time: '20 min', dok: '3' },
-      { title: `${systemName}: animation library`,   type: 'video',     apType: 'physiology', time: '12 min' },
-      { title: `${systemName} Kahoot`,               type: 'kahoot',    apType: 'physiology', time: '15 questions', dok: '2' },
-      { title: `Physiology AI tutor`,                type: 'aitool',    apType: 'physiology', time: 'Conversational' }
-    ],
-    optional: [
-      { title: `Primary literature: classic experiment`, type: 'reading',  apType: 'physiology', time: 'Brief' },
-      { title: `Boards-style practice questions`,        type: 'practice', apType: 'physiology', time: '15 min', dok: '3' },
-      { title: `Pathophysiology deep dive`,              type: 'reading',  apType: 'physiology', time: '~40 min' }
-    ],
-    refresher: [
-      { title: `${systemName}: anatomy review tour`, type: 'atlas',    apType: 'anatomy', time: '10 min' },
-      { title: `Key structures vocabulary`,          type: 'practice', apType: 'anatomy', time: '5 min', dok: '1' },
-      { title: `Cadaver clip: orientation`,          type: 'video',    apType: 'anatomy', time: '6 min' }
-    ]
-  };
-}
-function sampleAPResources(systemName) {
-  return {
-    required: [
-      { title: `${systemName} anatomy: structures to know`, type: 'reading', apType: 'anatomy',    time: '20 min' },
-      { title: `${systemName} physiology: functions`,       type: 'reading', apType: 'physiology', time: '25 min' },
-      { title: `Lab manual chapter`,                         type: 'lab',     apType: 'anatomy',    time: 'In lab' }
-    ],
-    recommended: [
-      { title: `Concept viewer: structure to function`, type: 'tool',     apType: 'physiology', time: 'Self-paced' },
-      { title: `Visible Body walkthrough`,              type: 'atlas',    apType: 'anatomy',    time: '15 min' },
-      { title: `Clinical case: linking A and P`,        type: 'case',     apType: 'physiology', time: '20 min', dok: '3' },
-      { title: `${systemName} Kahoot`,                  type: 'kahoot',   apType: 'physiology', time: '20 questions', dok: '2' },
-      { title: `${systemName} AI tutor`,                type: 'aitool',   apType: 'physiology', time: 'Conversational' }
-    ],
-    optional: [
-      { title: `Khan Academy video series`,             type: 'video',   apType: 'anatomy',    time: '~30 min' },
-      { title: `Pathophysiology reading`,               type: 'reading', apType: 'physiology', time: '~25 min' },
-      { title: `Cadaver clip for ${systemName}`,        type: 'video',   apType: 'anatomy',    time: '8 min' }
-    ]
-  };
-}
-
-// ============================================
-// COURSE TOOLKITS (categorized)
-// ============================================
 const TOOLKIT_CATS = {
   ai:       { label: 'AI Tools', sub: 'AI tutors and conversational study aids' },
   practice: { label: 'Practice', sub: 'DOK generators and practice worksheets' },
   games:    { label: 'Games',    sub: 'Kahoots and game-based review' },
   admin:    { label: 'Admin',    sub: 'Syllabus, schedules, policies' }
 };
-const TOOLKIT_ANATOMY = [
-  { cat: 'admin',    title: 'Syllabus & Course Calendar', type: 'admin',    desc: 'TBL session schedule, lab exam dates, due dates, and policies. Updated for Summer 2026.', meta: 'Updated June 2026' },
-  { cat: 'admin',    title: 'Lab Schedule & Safety',      type: 'admin',    desc: 'Weekly lab activities, dissection schedule, and safety protocols.',                       meta: '5 lab exams' },
-  { cat: 'ai',       title: 'Course AI Study Buddy',      type: 'aitool',   desc: 'Chat-based tutor trained on your syllabus and lecture content. Test your understanding any time.', meta: 'Always available' },
-  { cat: 'practice', title: 'DOK Practice Generator',     type: 'practice', desc: 'Generates practice questions at any DOK level (1 through 4). Pick your cognitive depth and module focus.', meta: 'Up to 50 questions', dok: '1-4' },
-  { cat: 'games',    title: 'Master Kahoot Bank',         type: 'kahoot',   desc: 'Every Kahoot from every module, organized by week. Play solo or assemble a session.',     meta: '24 sets · DOK 1/2' }
-];
-const TOOLKIT_AP = [
-  { cat: 'admin',    title: 'Syllabus & Calendar',        type: 'admin',     desc: 'Session schedule, exam dates, due dates, and policies.',                                  meta: 'Fall 2026' },
-  { cat: 'ai',       title: 'Course AI Study Buddy',      type: 'aitool',    desc: 'Chat-based tutor that handles both anatomy structures and physiology mechanisms.',         meta: 'Always available' },
-  { cat: 'ai',       title: 'ABG Tutor',                  type: 'aitool',    desc: 'Practice arterial blood gas interpretation with instant feedback.',                        meta: 'Built into renal/resp' },
-  { cat: 'practice', title: 'Hemodynamic Calculations',   type: 'worksheet', desc: 'Practice cardiac output, mean arterial pressure, and resistance calculations.',            meta: '15 problems' },
-  { cat: 'practice', title: 'DOK Practice Generator',     type: 'practice',  desc: 'Generates practice questions at any DOK level. Choose recall, application, or strategic clinical reasoning.', meta: 'Up to 50 questions', dok: '1-4' },
-  { cat: 'games',    title: 'Master Kahoot Bank',         type: 'kahoot',    desc: 'All module Kahoots in one place. Filter by anatomy, physiology, or both.',                meta: '21 sets · DOK 1/2' }
-];
-const TOOLKIT_PHYS = [
-  { cat: 'admin',    title: 'Course Calendar & Policies', type: 'admin',    desc: 'Lecture schedule, exam dates, and academic policies.',                                     meta: 'Fall 2026' },
-  { cat: 'ai',       title: 'Course AI Study Buddy',      type: 'aitool',   desc: 'Mechanism-focused tutor. Walk through pathways, regulation, and clinical cases.',          meta: 'Always available' },
-  { cat: 'ai',       title: 'ABG Tutor',                  type: 'aitool',   desc: 'Practice acid-base interpretation with progressive difficulty.',                           meta: '4 difficulty levels' },
-  { cat: 'practice', title: 'DOK Practice Generator',     type: 'practice', desc: 'Generates physiology questions at any DOK level. Recall through clinical reasoning.',     meta: 'Up to 50 questions', dok: '1-4' },
-  { cat: 'games',    title: 'Master Kahoot Bank',         type: 'kahoot',   desc: 'Every Kahoot organized by module and system.',                                              meta: '18 sets · DOK 2' }
-];
 
-const MOD_TOOLS_SAMPLE = (modName) => [
-  { title: `${modName} Kahoot`,        type: 'kahoot',   meta: '15 questions',     dok: '1,2' },
-  { title: `${modName} DOK Practice`,  type: 'practice', meta: 'Pick your level',  dok: '1-4' },
-  { title: `${modName} AI Tutor`,      type: 'aitool',   meta: 'Conversational' },
-  { title: `${modName} Lab Activity`,  type: 'lab',      meta: 'In-lab' }
-];
+// Default type per category (for new resources)
+const CAT_DEFAULT_TYPE = { ai: 'aitool', practice: 'practice', games: 'kahoot', admin: 'admin' };
 
-// ============================================
-// COURSE BUILDERS
-// ============================================
-function buildAnatomyCourse() {
-  const M = (id, num, name, meta, desc, topics, tools) => ({ id, num, name, meta, desc, topics, tools: tools || [] });
-  const T = (id, name, kind, sub) => ({ id, name, kind, sub: sub || '', resources: sampleResources(name) });
-  return {
-    type: 'anatomy', typeLabel: 'Anatomy course',
-    code: 'BIO 004', term: 'Summer 2026',
-    title: 'Human <em>Anatomy</em>',
-    subtitle: 'Eight modules. One body. Pick a module to dive into its topics.',
-    sections: ['required', 'recommended', 'optional'],
-    showAPFilter: false, showLegend: false,
-    toolkit: TOOLKIT_ANATOMY,
-    modules: [
-      M('m1', '01', 'Foundation & Histology', 'Lab Exam 1 prep', 'Anatomical terminology, body cavities, tissue types, and the language anatomists use to describe location.', [
-        T('m1-org',  'Body Organization & Terminology', ['system','region'], 'Foundation'),
-        T('m1-hist', 'Histology: Four Tissue Types',     ['system'],          'Tissue level')
-      ], MOD_TOOLS_SAMPLE('Module 1')),
-      M('m2', '02', 'Integumentary & Skeletal', 'Lab Exam 1 prep', 'Skin layers and accessory structures. Bone tissue, axial skeleton, appendicular skeleton, and joint classification.', [
-        T('m2-int',  'Integumentary System',          ['system'],          'Body covering'),
-        T('m2-skel', 'Skeletal System: Bone Tissue',  ['system'],          'Histology to gross'),
-        T('m2-axi',  'Axial Skeleton',                ['system','region'], 'Skull, vertebrae, thorax'),
-        T('m2-app',  'Appendicular Skeleton',         ['system','region'], 'Limbs and girdles')
-      ], MOD_TOOLS_SAMPLE('Module 2')),
-      M('m3', '03', 'Muscular System & Articulations', 'Lab Exam 2 prep', 'Skeletal muscle organization, named muscles by region, and joint structure and function.', [
-        T('m3-mus',  'Muscle Tissue & Organization', ['system'],          'Microscopic to gross'),
-        T('m3-tr',   'Trunk & Head Muscles',         ['system','region'], 'Axial musculature'),
-        T('m3-lim',  'Limb Muscles',                 ['system','region'], 'Appendicular musculature'),
-        T('m3-art',  'Articulations',                ['system'],          'Joint classification')
-      ], MOD_TOOLS_SAMPLE('Module 3')),
-      M('m4', '04', 'Nervous System & Special Senses', 'Lab Exam 3 prep', 'Central and peripheral nervous system organization. Brain, spinal cord, cranial and spinal nerves, and the special senses.', [
-        T('m4-cns',  'Central Nervous System',     ['system','region'], 'Brain & spinal cord'),
-        T('m4-pns',  'Peripheral Nervous System',  ['system'],          'Nerves & ganglia'),
-        T('m4-ans',  'Autonomic Nervous System',   ['system'],          'Sympathetic & parasympathetic'),
-        T('m4-sen',  'Special Senses',             ['system','region'], 'Eye, ear, taste, smell')
-      ], MOD_TOOLS_SAMPLE('Module 4')),
-      M('m5', '05', 'Endocrine & Cardiovascular', 'Lab Exam 4 prep', 'Endocrine glands and hormones. Heart anatomy, blood vessels, and circulatory pathways.', [
-        T('m5-end',  'Endocrine System',           ['system'],          'Glands & hormones'),
-        T('m5-hrt',  'Heart',                      ['system','region'], 'Chambers, valves, vessels'),
-        T('m5-vas',  'Vascular System',            ['system'],          'Arteries, veins, capillaries'),
-        T('m5-blo',  'Blood',                      ['system'],          'Components & function')
-      ], MOD_TOOLS_SAMPLE('Module 5')),
-      M('m6', '06', 'Lymphatic, Respiratory & Digestive', 'Lab Exam 4 prep', 'Lymphatic vessels and immunity. Airways and gas exchange. The alimentary canal and accessory digestive organs.', [
-        T('m6-lym',  'Lymphatic & Immune System',  ['system'],          'Defense & drainage'),
-        T('m6-res',  'Respiratory System',         ['system','region'], 'Upper & lower airways'),
-        T('m6-dig',  'Digestive System',           ['system','region'], 'GI tract & accessory organs')
-      ], MOD_TOOLS_SAMPLE('Module 6')),
-      M('m7', '07', 'Urinary & Fluid Balance', 'Lab Exam 5 prep', 'Kidney anatomy, the nephron, urinary tract, and the structures involved in fluid and electrolyte balance.', [
-        T('m7-uri', 'Urinary System',              ['system','region'], 'Kidneys & urinary tract'),
-        T('m7-flu', 'Fluid & Electrolyte Anatomy', ['system'],          'Compartments & structures')
-      ], MOD_TOOLS_SAMPLE('Module 7')),
-      M('m8', '08', 'Reproductive & Development', 'Lab Exam 5 prep', 'Male and female reproductive anatomy. Embryonic development and clinical correlations.', [
-        T('m8-rep-m', 'Male Reproductive System',   ['system','region'], 'Gonads & ducts'),
-        T('m8-rep-f', 'Female Reproductive System', ['system','region'], 'Ovaries, uterus, accessory'),
-        T('m8-dev',   'Development',                ['system'],          'Embryology basics')
-      ], MOD_TOOLS_SAMPLE('Module 8'))
-    ]
-  };
-}
-function buildPhysiologyCourse() {
-  const M = (id, num, name, meta, desc, topics, tools) => ({ id, num, name, meta, desc, topics, tools: tools || [] });
-  const T = (id, name, kind, sub) => ({ id, name, kind, sub: sub || '', resources: samplePhysResources(name) });
-  return {
-    type: 'physiology', typeLabel: 'Physiology course',
-    code: 'BIO 005', term: 'Fall 2026',
-    title: 'Human <em>Physiology</em>',
-    subtitle: 'Function, regulation, and the integrated mechanisms that keep the body alive. Each module pairs core physiology with a remedial anatomy refresher.',
-    sections: ['required', 'recommended', 'optional', 'refresher'],
-    showAPFilter: false, showLegend: false,
-    toolkit: TOOLKIT_PHYS,
-    modules: [
-      M('p1', '01', 'Cellular & Membrane Physiology', 'Foundation', 'Membrane transport, resting membrane potential, action potentials, and intercellular signaling.', [
-        T('p1-mem', 'Membrane Transport',         ['system'], 'Diffusion to active transport'),
-        T('p1-rmp', 'Resting Membrane Potential', ['system'], 'Ionic basis'),
-        T('p1-ap',  'Action Potentials',          ['system'], 'Excitable cell function')
-      ], MOD_TOOLS_SAMPLE('Module 1')),
-      M('p2', '02', 'Neural & Muscle Physiology', 'Module 2', 'Synaptic transmission, neural integration, and the molecular events of muscle contraction.', [
-        T('p2-syn', 'Synaptic Transmission',      ['system'], 'Chemical signaling'),
-        T('p2-mus', 'Skeletal Muscle Contraction',['system'], 'Sliding filament theory'),
-        T('p2-smo', 'Smooth & Cardiac Muscle',    ['system'], 'Comparative function')
-      ], MOD_TOOLS_SAMPLE('Module 2')),
-      M('p3', '03', 'Cardiovascular Physiology', 'Module 3', 'The cardiac cycle, cardiac output, blood pressure regulation, and microcirculation.', [
-        T('p3-card', 'Cardiac Cycle',              ['system','region'], 'Pressure & volume'),
-        T('p3-co',   'Cardiac Output & Regulation',['system'],          'Frank-Starling and beyond'),
-        T('p3-bp',   'Blood Pressure Regulation',  ['system'],          'Short and long term'),
-        T('p3-mic',  'Microcirculation',           ['system'],          'Capillary exchange')
-      ], MOD_TOOLS_SAMPLE('Module 3')),
-      M('p4', '04', 'Respiratory Physiology', 'Module 4', 'Mechanics of breathing, gas exchange, oxygen and CO2 transport, and respiratory control.', [
-        T('p4-mec', 'Mechanics of Breathing', ['system','region'], 'Pressures & compliance'),
-        T('p4-gas', 'Gas Exchange',           ['system'],          'Alveolar-capillary unit'),
-        T('p4-tra', 'O2 & CO2 Transport',     ['system'],          'Hemoglobin and beyond'),
-        T('p4-ctrl','Respiratory Control',    ['system'],          'Central and peripheral')
-      ], MOD_TOOLS_SAMPLE('Module 4')),
-      M('p5', '05', 'Renal Physiology & Acid-Base', 'Module 5', 'Glomerular filtration, tubular function, fluid and electrolyte balance, and acid-base regulation.', [
-        T('p5-gfr', 'Glomerular Filtration',     ['system','region'], 'Forces and clearance'),
-        T('p5-tub', 'Tubular Function',          ['system','region'], 'Reabsorption & secretion'),
-        T('p5-fl',  'Fluid & Electrolyte Balance',['system'],         'Body compartments'),
-        T('p5-ab',  'Acid-Base Physiology',      ['system'],          'Henderson-Hasselbalch')
-      ], MOD_TOOLS_SAMPLE('Module 5')),
-      M('p6', '06', 'GI, Endocrine & Reproductive', 'Module 6', 'GI motility and absorption, endocrine control, and the integrated physiology of reproduction.', [
-        T('p6-gi',  'GI Motility & Absorption',  ['system','region'], 'From mouth to colon'),
-        T('p6-end', 'Endocrine Control',         ['system'],          'Hypothalamus to target'),
-        T('p6-rep', 'Reproductive Physiology',   ['system','region'], 'HPG axis & cycles')
-      ], MOD_TOOLS_SAMPLE('Module 6'))
-    ]
-  };
-}
-function buildAPCourse() {
-  const M = (id, num, name, meta, desc, topics, tools) => ({ id, num, name, meta, desc, topics, tools: tools || [] });
-  const T = (id, name, kind, sub) => ({ id, name, kind, sub: sub || '', resources: sampleAPResources(name) });
-  return {
-    type: 'ap', typeLabel: 'Anatomy + Physiology',
-    code: 'BIO 431', term: 'Fall 2026',
-    title: 'Anatomy &amp; <em>Physiology</em>',
-    subtitle: 'Structure and function studied together. Filter the resources to focus on anatomy or physiology.',
-    sections: ['required', 'recommended', 'optional'],
-    showAPFilter: true, showLegend: true,
-    toolkit: TOOLKIT_AP,
-    modules: [
-      M('ap1', '01', 'Foundation: Cells & Tissues', 'Module 1', 'Cell structure, membrane transport, and the four tissue types that build every organ.', [
-        T('ap1-cell','Cell Structure & Transport', ['system'], 'Foundation'),
-        T('ap1-tis', 'Tissues',                    ['system'], 'Four primary types')
-      ], MOD_TOOLS_SAMPLE('Module 1')),
-      M('ap2', '02', 'Integumentary & Skeletal', 'Module 2', 'Skin structure and function. Bone tissue, the skeleton, and joint biomechanics.', [
-        T('ap2-int', 'Integumentary',           ['system'],          'Skin & accessory structures'),
-        T('ap2-bone','Bone & Skeletal System',  ['system','region'], 'Tissue to gross'),
-        T('ap2-art', 'Articulations',           ['system'],          'Joint structure & function')
-      ], MOD_TOOLS_SAMPLE('Module 2')),
-      M('ap3', '03', 'Muscular System', 'Module 3', 'Muscle anatomy, contraction physiology, and the major muscles by region.', [
-        T('ap3-mus','Muscle Tissue & Contraction', ['system'],          'Sliding filaments'),
-        T('ap3-reg','Major Muscles by Region',     ['system','region'], 'Trunk and limbs')
-      ], MOD_TOOLS_SAMPLE('Module 3')),
-      M('ap4', '04', 'Nervous & Endocrine', 'Module 4', 'Nervous system organization and function. Endocrine glands and hormone action.', [
-        T('ap4-cns', 'Central Nervous System',     ['system','region'], 'Brain & spinal cord'),
-        T('ap4-pns', 'Peripheral & Autonomic',     ['system'],          'Nerves & ANS'),
-        T('ap4-end', 'Endocrine System',           ['system'],          'Glands & hormones')
-      ], MOD_TOOLS_SAMPLE('Module 4')),
-      M('ap5', '05', 'Cardiovascular & Lymphatic', 'Module 5', 'Heart anatomy and the cardiac cycle. Vessels, blood pressure regulation, and the lymphatic system.', [
-        T('ap5-hrt', 'Heart Anatomy & Cycle',      ['system','region'], 'Structure to function'),
-        T('ap5-vas', 'Vascular System & BP',       ['system'],          'Vessels & regulation'),
-        T('ap5-blo', 'Blood',                      ['system'],          'Components & function'),
-        T('ap5-lym', 'Lymphatic & Immune',         ['system'],          'Defense & drainage')
-      ], MOD_TOOLS_SAMPLE('Module 5')),
-      M('ap6', '06', 'Respiratory, Digestive & Urinary', 'Module 6', 'Three organ systems with strong structure-function coupling and shared themes of transport and regulation.', [
-        T('ap6-res', 'Respiratory System',         ['system','region'], 'Anatomy & gas exchange'),
-        T('ap6-dig', 'Digestive System',           ['system','region'], 'GI tract & function'),
-        T('ap6-uri', 'Urinary System',             ['system','region'], 'Kidneys & filtration')
-      ], MOD_TOOLS_SAMPLE('Module 6')),
-      M('ap7', '07', 'Reproductive & Development', 'Module 7', 'Male and female reproductive anatomy and physiology. Endocrine control and basic embryology.', [
-        T('ap7-rep', 'Reproductive Systems',       ['system','region'], 'Anatomy and function'),
-        T('ap7-dev', 'Development',                ['system'],          'Embryology basics')
-      ], MOD_TOOLS_SAMPLE('Module 7'))
-    ]
-  };
-}
+// Allowed types per toolkit category (filtered options)
+const CAT_TYPES = {
+  ai:       ['aitool', 'tool', 'atlas'],
+  practice: ['practice', 'worksheet', 'quiz'],
+  games:    ['kahoot', 'quiz'],
+  admin:    ['admin', 'reading']
+};
 
-const COURSES = {
-  anatomy:    buildAnatomyCourse(),
-  ap:         buildAPCourse(),
-  physiology: buildPhysiologyCourse()
+// All types for topic resources
+const TOPIC_TYPES = ['reading', 'video', 'lab', 'tool', 'aitool', 'practice', 'case', 'atlas', 'quiz', 'notes', 'worksheet', 'kahoot', 'assignment'];
+
+const SECTION_META = {
+  required:    { letter: 'R', label: 'Required' },
+  recommended: { letter: 'H', label: 'Highly recommended' },
+  optional:    { letter: 'O', label: 'Optional' },
+  refresher:   { letter: 'A', label: 'Anatomy refresher' }
 };
 
 // ============================================
 // STATE
 // ============================================
 const state = {
-  view: 'hub',
-  course: 'anatomy',
-  activeModuleId: null,
-  organization: 'system',
-  apFilter: 'both',
-  activeSection: {},
-  openToolkitCats: new Set()
+  course: {
+    type: 'anatomy',
+    organization: 'modules',
+    code: '',
+    term: '',
+    title: '',
+    subtitle: '',
+    instructor: '',
+    institution: ''
+  },
+  toolkit: [],
+  modules: [],
+  ui: {
+    activeTKCat: 'ai',
+    openModules: new Set(),
+    openTopics: new Set(),
+    activeTopicSection: {} // topicId -> 'required' | 'recommended' | etc.
+  }
 };
 
-// ============================================
-// VIEW SWITCHING
-// ============================================
-function switchView(viewName) {
-  state.view = viewName;
-  document.getElementById('view-hub').classList.toggle('active', viewName === 'hub');
-  document.getElementById('view-module').classList.toggle('active', viewName === 'module');
-}
+const uid = () => Math.random().toString(36).slice(2, 9);
 
-function goHub() {
-  state.activeModuleId = null;
-  state.activeSection = {};
-  switchView('hub');
-  renderHub();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// ============================================
+// COURSE TYPE → SECTIONS
+// ============================================
+function sectionsFor(type) {
+  if (type === 'physiology') return ['required', 'recommended', 'optional', 'refresher'];
+  return ['required', 'recommended', 'optional'];
 }
+function showsAPFilter(type) { return type === 'ap'; }
 
-function goModule(moduleId) {
-  state.activeModuleId = moduleId;
-  state.activeSection = {};
-  switchView('module');
-  renderModule();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function unitLabel(plural = false) {
+  const isWeek = state.course.organization === 'weeks';
+  if (plural) return isWeek ? 'Weeks' : 'Modules';
+  return isWeek ? 'Week' : 'Module';
+}
+function defaultUnitNum(idx) {
+  return state.course.organization === 'weeks'
+    ? String(idx + 1)
+    : String(idx + 1).padStart(2, '0');
 }
 
 // ============================================
-// HUB RENDER
+// IDENTITY FORM BINDINGS
 // ============================================
-function renderHub() {
-  const c = COURSES[state.course];
-  const typeEl = document.getElementById('hero-type');
-  typeEl.textContent = c.typeLabel;
-  typeEl.dataset.type = c.type;
-  document.getElementById('hero-meta').textContent = `${c.code} · ${c.term}`;
-  document.getElementById('hero-title').innerHTML = c.title;
-  document.getElementById('hero-sub').textContent = c.subtitle;
+['type','organization','code','term','title','subtitle','instructor','institution'].forEach(k => {
+  const el = document.getElementById('f-' + k);
+  el.addEventListener('input', () => {
+    state.course[k] = el.value;
+    if (k === 'type') {
+      // Refresh module rendering since sections might have changed
+      renderModules();
+    }
+    if (k === 'organization') {
+      // Re-render Block 03 with new labels
+      renderBlock03Header();
+      renderModules();
+    }
+  });
+});
 
-  renderToolkit();
-  renderPicker();
+// ============================================
+// FILE PICKER → DATA URL
+// ============================================
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
 }
 
-function renderToolkit() {
-  const c = COURSES[state.course];
-  const host = document.getElementById('toolkit-host');
-  if (!c.toolkit || c.toolkit.length === 0) { host.innerHTML = ''; return; }
+function setupFilePicker(triggerBtn, urlInput, statusEl) {
+  triggerBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.style.display = 'none';
+    input.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const dataURL = await readFileAsDataURL(file);
+        urlInput.value = dataURL;
+        if (statusEl) {
+          const sizeKB = Math.round(file.size / 1024);
+          statusEl.innerHTML = `<strong>${escapeHTML(file.name)}</strong> attached (${sizeKB.toLocaleString()} KB)`;
+          statusEl.classList.remove('hidden');
+          if (file.size > 1024 * 1024) {
+            statusEl.innerHTML += ' &middot; <span style="color:var(--terra-text)">large file, will inflate exported HTML</span>';
+          }
+        }
+      } catch (err) {
+        alert('Could not read file: ' + err.message);
+      }
+    });
+    document.body.appendChild(input);
+    input.click();
+    setTimeout(() => input.remove(), 100);
+  });
+}
 
-  // Group items by category
+// ============================================
+// TOOLKIT EDITOR
+// ============================================
+function renderToolkitForm() {
+  const cat = state.ui.activeTKCat;
+  const meta = TOOLKIT_CATS[cat];
+  const allowed = CAT_TYPES[cat] || ['tool'];
+  const showDOK = cat === 'practice';
+
+  const host = document.getElementById('tk-form-host');
+  host.innerHTML = `
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label class="field-label field-required" for="tkf-title">Title</label>
+        <input class="input" id="tkf-title" placeholder="${escapeAttr(meta.label)} resource title">
+      </div>
+      <div class="field">
+        <label class="field-label" for="tkf-type">Type</label>
+        <select class="select" id="tkf-type">
+          ${allowed.map(t => `<option value="${t}" ${t === CAT_DEFAULT_TYPE[cat] ? 'selected' : ''}>${TYPE_LABELS[t]}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top: 10px;">
+      <div class="field">
+        <label class="field-label field-required" for="tkf-url">URL or attached file</label>
+        <div class="url-row">
+          <input class="input" id="tkf-url" placeholder="https://… or click Attach file">
+          <button type="button" class="btn-file" id="tkf-pick">+ Attach file</button>
+        </div>
+        <span class="file-loaded hidden" id="tkf-status"></span>
+      </div>
+    </div>
+    <div class="form-grid cols-2" style="margin-top: 10px;">
+      <div class="field">
+        <label class="field-label" for="tkf-desc">Short description</label>
+        <textarea class="textarea" id="tkf-desc" placeholder="One or two sentences students see beneath the title."></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label" for="tkf-meta">Meta line (optional)</label>
+        <input class="input" id="tkf-meta" placeholder="Updated June 2026 · 15 questions · Always available">
+        ${showDOK ? `
+          <label class="field-label" for="tkf-dok" style="margin-top: 8px;">DOK level (optional)</label>
+          <input class="input" id="tkf-dok" placeholder="1, 2, 3, 4, 1-4, or 2,3">
+        ` : ''}
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="tkf-add">+ Add to ${escapeHTML(meta.label)}</button>
+      <button class="btn-sm" id="tkf-bulk">Bulk paste URLs</button>
+    </div>
+  `;
+
+  // Wire up
+  setupFilePicker(
+    document.getElementById('tkf-pick'),
+    document.getElementById('tkf-url'),
+    document.getElementById('tkf-status')
+  );
+
+  document.getElementById('tkf-add').addEventListener('click', () => {
+    const title = document.getElementById('tkf-title').value.trim();
+    const url = document.getElementById('tkf-url').value.trim();
+    const type = document.getElementById('tkf-type').value;
+    const desc = document.getElementById('tkf-desc').value.trim();
+    const meta = document.getElementById('tkf-meta').value.trim();
+    const dokEl = document.getElementById('tkf-dok');
+    const dok = dokEl ? dokEl.value.trim() : '';
+    if (!title || !url) { alert('Title and URL are required.'); return; }
+    state.toolkit.push({
+      id: uid(), cat: state.ui.activeTKCat,
+      title, url, type, desc, meta, dok
+    });
+    renderToolkitList();
+    renderTKCounts();
+    // Reset form
+    ['tkf-title','tkf-url','tkf-desc','tkf-meta'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    if (dokEl) dokEl.value = '';
+    document.getElementById('tkf-status').classList.add('hidden');
+  });
+
+  document.getElementById('tkf-bulk').addEventListener('click', () => {
+    openBulkModal('toolkit');
+  });
+}
+
+function renderToolkitList() {
+  const host = document.getElementById('tk-list');
+  const cat = state.ui.activeTKCat;
+  const items = state.toolkit.filter(t => t.cat === cat);
+  if (items.length === 0) {
+    host.innerHTML = `<div class="empty">No ${escapeHTML(TOOLKIT_CATS[cat].label)} resources yet. Add one above.</div>`;
+    return;
+  }
+  host.innerHTML = items.map(t => entryHTML(t)).join('');
+  host.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (!confirm('Delete this resource?')) return;
+      state.toolkit = state.toolkit.filter(x => x.id !== b.dataset.del);
+      renderToolkitList();
+      renderTKCounts();
+    });
+  });
+}
+
+function entryHTML(t) {
+  const tagLabel = TYPE_LABELS[t.type] || t.type;
+  const tagClass = 'tag-' + t.type;
+  const dokHTML = t.dok ? `<span class="entry-dok">DOK ${escapeHTML(t.dok.includes(',') ? t.dok.split(',').join('/') : t.dok)}</span>` : '';
+  return `
+    <div class="entry">
+      <div class="entry-body">
+        <div class="entry-tags">
+          <span class="entry-tag ${tagClass}">${escapeHTML(tagLabel)}</span>
+          ${dokHTML}
+          ${t.apType ? `<span class="entry-tag tag-${t.apType === 'anatomy' ? 'anat' : 'phys'}">${t.apType === 'anatomy' ? 'Anat' : 'Phys'}</span>` : ''}
+        </div>
+        <div class="entry-title">${escapeHTML(t.title)}</div>
+        ${t.desc ? `<div class="entry-desc">${escapeHTML(t.desc)}</div>` : ''}
+        ${t.meta ? `<div class="entry-meta">${escapeHTML(t.meta)}</div>` : ''}
+        <div class="entry-link">${escapeHTML(t.url.length > 80 ? t.url.slice(0, 80) + '…' : t.url)}</div>
+      </div>
+      <div class="entry-actions">
+        <button class="icon-btn" data-del="${t.id}">Delete</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderTKCounts() {
+  ['ai','practice','games','admin'].forEach(cat => {
+    const el = document.querySelector(`[data-cat-count="${cat}"]`);
+    if (el) el.textContent = state.toolkit.filter(t => t.cat === cat).length;
+  });
+}
+
+// Toolkit category tab switching
+document.querySelectorAll('.tk-cat-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    state.ui.activeTKCat = t.dataset.tkCat;
+    document.querySelectorAll('.tk-cat-tab').forEach(x => {
+      x.classList.toggle('active', x === t);
+      x.setAttribute('aria-selected', x === t ? 'true' : 'false');
+    });
+    renderToolkitForm();
+    renderToolkitList();
+  });
+});
+
+// ============================================
+// MODULE EDITOR
+// ============================================
+function renderBlock03Header() {
+  const isWeek = state.course.organization === 'weeks';
+  const titleEl = document.getElementById('block03-title');
+  const helperEl = document.getElementById('block03-helper');
+  const btnEl = document.getElementById('btn-add-module');
+  const qsUnitEl = document.getElementById('qs-unit-text');
+  if (titleEl) titleEl.textContent = isWeek ? 'Weeks and topics' : 'Modules and topics';
+  if (helperEl) {
+    const u = isWeek ? 'week' : 'module';
+    const sec = state.course.type === 'physiology'
+      ? 'Required (R), Highly recommended (H), Optional (O), and Anatomy refresher (A)'
+      : 'Required (R), Highly recommended (H), and Optional (O)';
+    helperEl.textContent = `Each ${u} has its own topics (e.g., body systems). Each topic has resources sorted into ${sec}. Empty ${u}s and topics don't appear in the published hub.`;
+  }
+  if (btnEl) btnEl.textContent = isWeek ? '+ Add week' : '+ Add module';
+  if (qsUnitEl) qsUnitEl.textContent = isWeek ? 'weeks' : 'modules';
+}
+
+function renderModules() {
+  const host = document.getElementById('mod-list');
+  if (state.modules.length === 0) {
+    const u = unitLabel().toLowerCase();
+    host.innerHTML = `<div class="empty">No ${u}s yet. Click + Add ${u} to start, or load demo content to see how it works.</div>`;
+    return;
+  }
+  host.innerHTML = state.modules.map(mod => modItemHTML(mod)).join('');
+  attachModuleHandlers();
+}
+
+function modItemHTML(mod) {
+  const isOpen = state.ui.openModules.has(mod.id);
+  const topicCount = mod.topics.length;
+  return `
+    <article class="mod-item" data-mod-id="${mod.id}" data-open="${isOpen}">
+      <button class="mod-trigger" type="button" data-mod-toggle="${mod.id}" aria-expanded="${isOpen}">
+        <span class="mod-num">${escapeHTML(mod.num || '00')}</span>
+        <span><span class="mod-name">${escapeHTML(mod.name || 'Untitled module')}</span><br><span class="mod-meta">${escapeHTML(mod.meta || '')} · ${topicCount} ${topicCount === 1 ? 'topic' : 'topics'}</span></span>
+        <button class="icon-btn" data-mod-del="${mod.id}" onclick="event.stopPropagation()">Delete</button>
+        <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3,6 8,11 13,6"></polyline></svg>
+      </button>
+      <div class="mod-body">${isOpen ? modBodyHTML(mod) : ''}</div>
+    </article>
+  `;
+}
+
+function modBodyHTML(mod) {
+  const u = unitLabel().toLowerCase();
+  return `
+    <div class="form-grid cols-3">
+      <div class="field">
+        <label class="field-label field-required">${unitLabel()} name</label>
+        <input class="input" data-mod-field="name" data-mod-id="${mod.id}" value="${escapeAttr(mod.name)}" placeholder="Integumentary &amp; Skeletal">
+      </div>
+      <div class="field">
+        <label class="field-label">Number</label>
+        <input class="input" data-mod-field="num" data-mod-id="${mod.id}" value="${escapeAttr(mod.num)}" placeholder="${state.course.organization === 'weeks' ? '2' : '02'}">
+      </div>
+      <div class="field">
+        <label class="field-label">Meta (optional)</label>
+        <input class="input" data-mod-field="meta" data-mod-id="${mod.id}" value="${escapeAttr(mod.meta)}" placeholder="Lab Exam 1 prep">
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top: 10px;">
+      <div class="field">
+        <label class="field-label">Description</label>
+        <textarea class="textarea" data-mod-field="desc" data-mod-id="${mod.id}" placeholder="A sentence or two about what this ${u} covers.">${escapeHTML(mod.desc)}</textarea>
+      </div>
+    </div>
+
+    <div class="sub-head">Topics in this ${u} (e.g., body systems)</div>
+    <div class="toolbar" style="margin-top: 0; margin-bottom: 10px;">
+      <button class="btn-sm" data-add-topic="${mod.id}">+ Add topic</button>
+    </div>
+    <div class="topic-list">
+      ${mod.topics.length === 0
+        ? `<div class="empty">No topics yet. Add one to attach resources.</div>`
+        : mod.topics.map(topic => topicItemHTML(mod, topic)).join('')}
+    </div>
+  `;
+}
+
+function topicItemHTML(mod, topic) {
+  const isOpen = state.ui.openTopics.has(topic.id);
+  const sections = sectionsFor(state.course.type);
+  const totalRes = sections.reduce((sum, s) => sum + (topic.resources[s] || []).length, 0);
+  return `
+    <article class="topic-item" data-topic-id="${topic.id}" data-open="${isOpen}">
+      <button class="topic-trigger" type="button" data-topic-toggle="${topic.id}" aria-expanded="${isOpen}">
+        <span></span>
+        <span><span class="topic-name">${escapeHTML(topic.name || 'Untitled topic')}</span><br><span class="topic-sub">${escapeHTML(topic.sub || '')} · ${totalRes} ${totalRes === 1 ? 'resource' : 'resources'}</span></span>
+        <button class="icon-btn" data-topic-del="${topic.id}" data-mod-of-topic="${mod.id}" onclick="event.stopPropagation()">Delete</button>
+        <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3,6 8,11 13,6"></polyline></svg>
+      </button>
+      <div class="topic-body">${isOpen ? topicBodyHTML(mod, topic) : ''}</div>
+    </article>
+  `;
+}
+
+function topicBodyHTML(mod, topic) {
+  const sections = sectionsFor(state.course.type);
+  const activeSec = state.ui.activeTopicSection[topic.id] || 'required';
+  const showAPType = state.course.type === 'ap';
+
+  return `
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label class="field-label field-required">Topic name</label>
+        <input class="input" data-topic-field="name" data-mod-id="${mod.id}" data-topic-id="${topic.id}" value="${escapeAttr(topic.name)}" placeholder="Skeletal System: Bone Tissue">
+      </div>
+      <div class="field">
+        <label class="field-label">Sub-label (optional)</label>
+        <input class="input" data-topic-field="sub" data-mod-id="${mod.id}" data-topic-id="${topic.id}" value="${escapeAttr(topic.sub)}" placeholder="Histology to gross">
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top: 10px;">
+      <div class="field">
+        <label class="field-label">Organize by</label>
+        <div class="chip-row" role="group">
+          ${['system','region','both'].map(k => {
+            const isActive = (k === 'both' && topic.kind.includes('system') && topic.kind.includes('region')) ||
+                            (k !== 'both' && topic.kind.includes(k) && !(topic.kind.includes('system') && topic.kind.includes('region')));
+            return `<button class="chip" data-topic-kind="${k}" data-mod-id="${mod.id}" data-topic-id="${topic.id}" aria-pressed="${isActive}">${k.charAt(0).toUpperCase() + k.slice(1)}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-head">Resources for this topic</div>
+    <div class="chip-row" role="tablist" aria-label="Section" style="margin-bottom: 10px;">
+      ${sections.map(sec => {
+        const meta = SECTION_META[sec];
+        const count = (topic.resources[sec] || []).length;
+        return `<button class="chip" data-sec="${sec}" data-topic-id="${topic.id}" aria-pressed="${activeSec === sec}">${meta.letter} · ${meta.label} (${count})</button>`;
+      }).join('')}
+    </div>
+
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label class="field-label field-required">Title</label>
+        <input class="input" id="rf-title-${topic.id}" placeholder="Lecture slides">
+      </div>
+      <div class="field">
+        <label class="field-label">Type</label>
+        <select class="select" id="rf-type-${topic.id}">
+          ${TOPIC_TYPES.map(t => `<option value="${t}" ${t === 'reading' ? 'selected' : ''}>${TYPE_LABELS[t]}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top: 10px;">
+      <div class="field">
+        <label class="field-label field-required">URL or file</label>
+        <div class="url-row">
+          <input class="input" id="rf-url-${topic.id}" placeholder="https://… or attach file">
+          <button type="button" class="btn-file" data-rf-pick="${topic.id}">+ Attach file</button>
+        </div>
+        <span class="file-loaded hidden" id="rf-status-${topic.id}"></span>
+      </div>
+    </div>
+    <div class="form-grid cols-3" style="margin-top: 10px;">
+      <div class="field">
+        <label class="field-label">Meta (optional)</label>
+        <input class="input" id="rf-meta-${topic.id}" placeholder="20 min read · 15 questions">
+      </div>
+      <div class="field">
+        <label class="field-label">DOK (optional)</label>
+        <input class="input" id="rf-dok-${topic.id}" placeholder="1, 2, 3, 4, 1-4, or 2,3">
+      </div>
+      ${showAPType ? `
+      <div class="field">
+        <label class="field-label">Anat or Phys</label>
+        <select class="select" id="rf-aptype-${topic.id}">
+          <option value="anatomy">Anatomy</option>
+          <option value="physiology">Physiology</option>
+        </select>
+      </div>
+      ` : '<div></div>'}
+    </div>
+    <div class="toolbar">
+      <button class="btn" data-rf-add="${topic.id}" data-mod-id="${mod.id}">+ Add resource</button>
+      <button class="btn-sm" data-rf-bulk="${topic.id}" data-mod-id="${mod.id}">Bulk paste URLs</button>
+    </div>
+
+    <div class="entry-list" style="margin-top: 14px;" data-rf-list="${topic.id}">
+      ${(topic.resources[activeSec] || []).length === 0
+        ? `<div class="empty">No ${SECTION_META[activeSec].label.toLowerCase()} resources yet for this topic.</div>`
+        : topic.resources[activeSec].map(r => entryHTML(r)).join('')}
+    </div>
+  `;
+}
+
+function attachModuleHandlers() {
+  // Module toggle
+  document.querySelectorAll('[data-mod-toggle]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = b.dataset.modToggle;
+      if (state.ui.openModules.has(id)) state.ui.openModules.delete(id);
+      else state.ui.openModules.add(id);
+      renderModules();
+    });
+  });
+  // Module delete
+  document.querySelectorAll('[data-mod-del]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = b.dataset.modDel;
+      if (!confirm(`Delete this ${unitLabel().toLowerCase()} and all its topics?`)) return;
+      state.modules = state.modules.filter(m => m.id !== id);
+      state.ui.openModules.delete(id);
+      renderModules();
+    });
+  });
+  // Module field updates
+  document.querySelectorAll('[data-mod-field]').forEach(el => {
+    el.addEventListener('input', () => {
+      const mod = state.modules.find(m => m.id === el.dataset.modId);
+      if (mod) mod[el.dataset.modField] = el.value;
+    });
+  });
+  // Add topic
+  document.querySelectorAll('[data-add-topic]').forEach(b => {
+    b.addEventListener('click', () => {
+      const mod = state.modules.find(m => m.id === b.dataset.addTopic);
+      if (!mod) return;
+      const newTopic = {
+        id: uid(), name: '', sub: '', kind: ['system'],
+        resources: { required: [], recommended: [], optional: [], refresher: [] }
+      };
+      mod.topics.push(newTopic);
+      state.ui.openTopics.add(newTopic.id);
+      renderModules();
+    });
+  });
+  // Topic toggle
+  document.querySelectorAll('[data-topic-toggle]').forEach(b => {
+    b.addEventListener('click', () => {
+      const id = b.dataset.topicToggle;
+      if (state.ui.openTopics.has(id)) state.ui.openTopics.delete(id);
+      else state.ui.openTopics.add(id);
+      renderModules();
+    });
+  });
+  // Topic delete
+  document.querySelectorAll('[data-topic-del]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = b.dataset.topicDel;
+      const modId = b.dataset.modOfTopic;
+      if (!confirm('Delete this topic and all its resources?')) return;
+      const mod = state.modules.find(m => m.id === modId);
+      if (mod) mod.topics = mod.topics.filter(t => t.id !== id);
+      state.ui.openTopics.delete(id);
+      renderModules();
+    });
+  });
+  // Topic field updates
+  document.querySelectorAll('[data-topic-field]').forEach(el => {
+    el.addEventListener('input', () => {
+      const mod = state.modules.find(m => m.id === el.dataset.modId);
+      if (!mod) return;
+      const topic = mod.topics.find(t => t.id === el.dataset.topicId);
+      if (topic) topic[el.dataset.topicField] = el.value;
+    });
+  });
+  // Topic kind
+  document.querySelectorAll('[data-topic-kind]').forEach(b => {
+    b.addEventListener('click', () => {
+      const mod = state.modules.find(m => m.id === b.dataset.modId);
+      if (!mod) return;
+      const topic = mod.topics.find(t => t.id === b.dataset.topicId);
+      if (!topic) return;
+      const kind = b.dataset.topicKind;
+      if (kind === 'both') topic.kind = ['system', 'region'];
+      else topic.kind = [kind];
+      renderModules();
+    });
+  });
+  // Section selector
+  document.querySelectorAll('[data-sec]').forEach(b => {
+    b.addEventListener('click', () => {
+      state.ui.activeTopicSection[b.dataset.topicId] = b.dataset.sec;
+      renderModules();
+    });
+  });
+  // Resource file pickers
+  document.querySelectorAll('[data-rf-pick]').forEach(b => {
+    const tid = b.dataset.rfPick;
+    setupFilePicker(b, document.getElementById('rf-url-' + tid), document.getElementById('rf-status-' + tid));
+  });
+  // Add resource
+  document.querySelectorAll('[data-rf-add]').forEach(b => {
+    b.addEventListener('click', () => {
+      const tid = b.dataset.rfAdd;
+      const modId = b.dataset.modId;
+      const mod = state.modules.find(m => m.id === modId);
+      if (!mod) return;
+      const topic = mod.topics.find(t => t.id === tid);
+      if (!topic) return;
+      const sec = state.ui.activeTopicSection[tid] || 'required';
+      const title = document.getElementById('rf-title-' + tid).value.trim();
+      const url = document.getElementById('rf-url-' + tid).value.trim();
+      const type = document.getElementById('rf-type-' + tid).value;
+      const meta = document.getElementById('rf-meta-' + tid).value.trim();
+      const dok = document.getElementById('rf-dok-' + tid).value.trim();
+      const apType = state.course.type === 'ap' ? document.getElementById('rf-aptype-' + tid).value : null;
+      if (!title || !url) { alert('Title and URL are required.'); return; }
+      const res = { id: uid(), title, url, type, meta, dok };
+      if (apType) res.apType = apType;
+      topic.resources[sec].push(res);
+      renderModules();
+    });
+  });
+  // Bulk paste for topic
+  document.querySelectorAll('[data-rf-bulk]').forEach(b => {
+    b.addEventListener('click', () => {
+      openBulkModal('topic', { topicId: b.dataset.rfBulk, modId: b.dataset.modId });
+    });
+  });
+  // Resource delete
+  document.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      // Find the resource in any topic and remove
+      if (!confirm('Delete this resource?')) return;
+      const id = b.dataset.del;
+      // Try toolkit first
+      const tkBefore = state.toolkit.length;
+      state.toolkit = state.toolkit.filter(x => x.id !== id);
+      if (state.toolkit.length < tkBefore) { renderToolkitList(); renderTKCounts(); return; }
+      // Try topic resources
+      state.modules.forEach(mod => {
+        mod.topics.forEach(topic => {
+          ['required','recommended','optional','refresher'].forEach(sec => {
+            topic.resources[sec] = (topic.resources[sec] || []).filter(r => r.id !== id);
+          });
+        });
+      });
+      renderModules();
+    });
+  });
+}
+
+// ============================================
+// ADD MODULE
+// ============================================
+document.getElementById('btn-add-module').addEventListener('click', () => {
+  const num = defaultUnitNum(state.modules.length);
+  const newMod = {
+    id: uid(), num, name: '', meta: '', desc: '', topics: []
+  };
+  state.modules.push(newMod);
+  state.ui.openModules.add(newMod.id);
+  renderModules();
+});
+
+document.getElementById('btn-qs-generate').addEventListener('click', () => {
+  const n = parseInt(document.getElementById('qs-count').value, 10);
+  if (!n || n < 1 || n > 40) { alert('Enter a number between 1 and 40.'); return; }
+  if (state.modules.length > 0) {
+    const u = unitLabel(true).toLowerCase();
+    if (!confirm(`You already have ${state.modules.length} ${u}. Add ${n} more empty ${u} (will continue numbering)?`)) return;
+  }
+  const startIdx = state.modules.length;
+  for (let i = 0; i < n; i++) {
+    state.modules.push({
+      id: uid(),
+      num: defaultUnitNum(startIdx + i),
+      name: '', meta: '', desc: '', topics: []
+    });
+  }
+  // Don't auto-open them - that creates 8+ open accordions which is overwhelming
+  renderModules();
+});
+
+// ============================================
+// BULK MODAL
+// ============================================
+let bulkContext = { kind: null, topicId: null, modId: null };
+function openBulkModal(kind, ctx) {
+  bulkContext = { kind, ...(ctx || {}) };
+  document.getElementById('modal-bulk').classList.add('active');
+  setTimeout(() => document.getElementById('bulk-textarea').focus(), 80);
+}
+function closeBulkModal() {
+  document.getElementById('modal-bulk').classList.remove('active');
+  document.getElementById('bulk-textarea').value = '';
+}
+document.getElementById('modal-bulk-close').addEventListener('click', closeBulkModal);
+document.getElementById('modal-bulk-cancel').addEventListener('click', closeBulkModal);
+document.getElementById('modal-bulk').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-bulk') closeBulkModal();
+});
+document.getElementById('modal-bulk-add').addEventListener('click', () => {
+  const txt = document.getElementById('bulk-textarea').value.trim();
+  if (!txt) { closeBulkModal(); return; }
+  const lines = txt.split('\n').map(l => l.trim()).filter(Boolean);
+  let added = 0;
+  lines.forEach((line) => {
+    let url, title;
+    if (line.includes('|')) {
+      const parts = line.split('|').map(s => s.trim());
+      url = parts[0]; title = parts[1] || parts[0];
+    } else {
+      url = line;
+      title = url.split('/').filter(Boolean).pop() || 'Untitled';
+    }
+    if (!/^(https?:|data:)/i.test(url)) return;
+    if (bulkContext.kind === 'toolkit') {
+      const cat = state.ui.activeTKCat;
+      state.toolkit.push({
+        id: uid(), cat, title, url,
+        type: CAT_DEFAULT_TYPE[cat],
+        desc: '', meta: '', dok: ''
+      });
+    } else if (bulkContext.kind === 'topic') {
+      const mod = state.modules.find(m => m.id === bulkContext.modId);
+      if (!mod) return;
+      const topic = mod.topics.find(t => t.id === bulkContext.topicId);
+      if (!topic) return;
+      const sec = state.ui.activeTopicSection[bulkContext.topicId] || 'required';
+      const res = { id: uid(), title, url, type: 'reading', meta: '', dok: '' };
+      if (state.course.type === 'ap') res.apType = 'anatomy';
+      topic.resources[sec].push(res);
+    }
+    added++;
+  });
+  closeBulkModal();
+  if (added > 0) {
+    if (bulkContext.kind === 'toolkit') { renderToolkitList(); renderTKCounts(); }
+    else renderModules();
+    alert(`Added ${added} ${added === 1 ? 'resource' : 'resources'}.`);
+  } else {
+    alert('No valid URLs found. Each must start with http:// or https://');
+  }
+});
+
+// ============================================
+// TAB SWITCHING
+// ============================================
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => {
+      x.classList.toggle('active', x === t);
+      x.setAttribute('aria-selected', x === t ? 'true' : 'false');
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => {
+      p.classList.toggle('active', p.id === 'pane-' + t.dataset.tab);
+    });
+    if (t.dataset.tab === 'preview') refreshPreview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// ============================================
+// HUB GENERATOR (used for preview + export)
+// ============================================
+const HUB_CSS = `
+:root {
+  --bg: #FFFFFF; --bg-page: #F4F5F8; --bg-tint: #F7F8FA;
+  --navy: #0A1322; --navy-mid: #1F2D44;
+  --gold: #D4A24C; --gold-text: #6E5018; --gold-bright: #E5B45C;
+  --terra: #C25A3E; --terra-text: #7A2F18; --terra-bright: #E59575;
+  --teal-text: #2C5F66; --teal-bright: #5B9AA0;
+  --plum-text: #5C2A66; --slate-text: #334155; --admin-text: #2C3E50;
+  --ink: #0A1322; --ink-soft: #14202F; --ink-muted: #3D4860;
+  --rule: #B8BEC8; --rule-soft: #DCE0E6; --rule-faint: #E8EBEF;
+  --sans: 'Plus Jakarta Sans', sans-serif;
+  --reading: 'Atkinson Hyperlegible', 'Plus Jakarta Sans', sans-serif;
+  --shadow-card: 0 1px 3px rgba(10,19,34,0.08), 0 1px 2px rgba(10,19,34,0.05);
+  --shadow-lift: 0 6px 16px rgba(10,19,34,0.10), 0 3px 6px rgba(10,19,34,0.06);
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-page); }
+body { color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+em { font-style: normal; font-weight: 700; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px; }
+.app { max-width: 1200px; margin: 0 auto; padding: 28px 40px 96px; background: var(--bg); min-height: 100vh; }
+.topbar { padding-bottom: 22px; border-bottom: 1px solid var(--rule-soft); margin-bottom: 36px; }
+.brand-mark { font-family: var(--sans); font-weight: 500; font-size: 28px; letter-spacing: -0.025em; color: var(--navy); }
+.brand-mark em { color: var(--terra-text); }
+.view { display: none; }
+.view.active { display: block; }
+.hero { padding: 24px 0 36px; border-bottom: 1px solid var(--rule-soft); margin-bottom: 32px; }
+.hero-pills { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+.hero-type-pill { font-family: var(--sans); font-size: 13px; font-weight: 600; color: white; padding: 5px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px; }
+.hero-type-pill[data-type="anatomy"] { background: var(--terra-text); }
+.hero-type-pill[data-type="physiology"] { background: var(--teal-text); }
+.hero-type-pill[data-type="ap"] { background: var(--navy); }
+.hero-type-pill[data-type="ap"]::before { content: ''; display: inline-block; width: 9px; height: 9px; background: linear-gradient(135deg, var(--terra-bright) 50%, var(--teal-bright) 50%); border-radius: 999px; }
+.hero-meta { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-muted); }
+.hero-title { font-family: var(--sans); font-weight: 700; font-size: clamp(36px, 5.6vw, 60px); letter-spacing: -0.022em; line-height: 1.05; color: var(--navy); margin-bottom: 18px; }
+.hero-title em { color: var(--terra-text); }
+.hero-subtitle { font-family: var(--reading); font-size: clamp(17px, 1.6vw, 19px); color: var(--ink-soft); max-width: 64ch; line-height: 1.55; }
+.toolkit { margin-bottom: 56px; }
+.toolkit-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap; }
+.toolkit-head-title { font-family: var(--sans); font-weight: 700; font-size: 22px; color: var(--navy); }
+.toolkit-head-sub { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--ink-muted); }
+.toolkit-shutter-list { display: flex; flex-direction: column; gap: 8px; }
+.toolkit-shutter { background: white; border: 1px solid var(--rule-soft); overflow: hidden; transition: all 0.2s var(--ease); }
+.toolkit-shutter:hover { border-color: var(--rule); }
+.toolkit-shutter[data-open="true"] { border-color: var(--navy); box-shadow: var(--shadow-card); }
+.toolkit-shutter-trigger { width: 100%; display: grid; grid-template-columns: 28px 1fr auto auto; gap: 14px; align-items: center; background: white; border: none; padding: 14px 18px; cursor: pointer; text-align: left; font-family: var(--sans); transition: background 0.2s var(--ease); }
+.toolkit-shutter-trigger:hover { background: var(--bg-tint); }
+.toolkit-shutter[data-open="true"] .toolkit-shutter-trigger { background: var(--navy); color: white; }
+.louvers { width: 28px; height: 28px; display: flex; flex-direction: column; justify-content: space-between; padding: 4px 2px; border: 1.5px solid var(--ink-muted); background: var(--bg-tint); transition: all 0.2s var(--ease); flex-shrink: 0; }
+.toolkit-shutter .louvers { width: 24px; height: 24px; }
+.toolkit-shutter[data-open="true"] .louvers, .shutter[data-open="true"] .louvers { border-color: white; background: var(--navy-mid); }
+.louver { height: 4px; background: var(--ink-muted); transform-origin: center; transition: transform 0.4s var(--ease), background 0.2s var(--ease); }
+.toolkit-shutter .louver { height: 3px; }
+.toolkit-shutter[data-open="true"] .louver, .shutter[data-open="true"] .louver { background: var(--gold-bright); }
+.toolkit-shutter[data-open="true"] .louver:nth-child(1), .shutter[data-open="true"] .louver:nth-child(1) { transform: rotateX(72deg); }
+.toolkit-shutter[data-open="true"] .louver:nth-child(2), .shutter[data-open="true"] .louver:nth-child(2) { transform: rotateX(72deg); transition-delay: 0.05s; }
+.toolkit-shutter[data-open="true"] .louver:nth-child(3), .shutter[data-open="true"] .louver:nth-child(3) { transform: rotateX(72deg); transition-delay: 0.1s; }
+.toolkit-shutter-name { font-family: var(--sans); font-weight: 700; font-size: 16px; color: var(--ink); line-height: 1.25; margin-bottom: 2px; }
+.toolkit-shutter[data-open="true"] .toolkit-shutter-name { color: white; }
+.toolkit-shutter-sub { font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--ink-muted); }
+.toolkit-shutter[data-open="true"] .toolkit-shutter-sub { color: var(--gold-bright); }
+.toolkit-shutter-count { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--ink-muted); white-space: nowrap; }
+.toolkit-shutter[data-open="true"] .toolkit-shutter-count { color: var(--gold-bright); }
+.toolkit-chevron { width: 16px; height: 16px; transition: transform 0.3s var(--ease); color: var(--ink-muted); flex-shrink: 0; }
+.toolkit-shutter[data-open="true"] .toolkit-chevron { transform: rotate(180deg); color: white; }
+.toolkit-shutter-body { display: none; padding: 18px; background: white; border-top: 1px solid var(--rule-faint); }
+.toolkit-shutter[data-open="true"] .toolkit-shutter-body { display: block; }
+.toolkit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.toolkit-card { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: white; border: 1px solid var(--rule-faint); text-decoration: none; color: var(--ink); transition: all 0.18s var(--ease); }
+.toolkit-card:hover { border-color: var(--navy); box-shadow: var(--shadow-card); transform: translateY(-1px); }
+.toolkit-card-tag-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.toolkit-card-title { font-family: var(--sans); font-weight: 700; font-size: 15.5px; line-height: 1.3; }
+.toolkit-card-desc { font-family: var(--sans); font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+.toolkit-card-meta { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); margin-top: auto; padding-top: 4px; }
+.picker-section { margin-bottom: 24px; }
+.picker-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap; }
+.picker-head-title { font-family: var(--sans); font-weight: 700; font-size: 22px; color: var(--navy); }
+.picker-head-sub { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--ink-muted); }
+.picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.picker-card { display: flex; flex-direction: column; padding: 22px 22px 18px; background: white; border: 1px solid var(--rule-soft); text-decoration: none; color: var(--ink); transition: all 0.2s var(--ease); cursor: pointer; text-align: left; font-family: var(--sans); }
+.picker-card:hover { border-color: var(--navy); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+.picker-card-num-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.picker-card-num { font-family: var(--sans); font-weight: 700; font-size: 32px; color: var(--gold-text); line-height: 1; }
+.picker-card-meta { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); margin-left: auto; }
+.picker-card-title { font-family: var(--sans); font-weight: 700; font-size: 19px; line-height: 1.25; color: var(--navy); margin-bottom: 10px; }
+.picker-card-desc { font-family: var(--reading); font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 14px; }
+.picker-card-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--rule-faint); margin-top: auto; }
+.picker-card-count { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-muted); }
+.picker-card-arrow { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--terra-text); display: flex; align-items: center; gap: 6px; }
+.picker-card:hover .picker-card-arrow { color: var(--navy); gap: 10px; }
+.breadcrumb { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 13.5px; font-weight: 500; margin-bottom: 18px; flex-wrap: wrap; }
+.breadcrumb button { color: var(--ink-muted); text-decoration: none; background: transparent; border: none; padding: 0; font: inherit; cursor: pointer; }
+.breadcrumb button:hover { color: var(--terra-text); text-decoration: underline; }
+.breadcrumb-sep { color: var(--rule); }
+.breadcrumb-current { color: var(--navy); font-weight: 600; }
+.module-hero { padding: 8px 0 32px; border-bottom: 1px solid var(--rule-soft); margin-bottom: 28px; }
+.module-hero-num-row { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.module-hero-num { font-family: var(--sans); font-weight: 700; font-size: 26px; color: var(--gold-text); line-height: 1; }
+.module-hero-meta { font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--ink-muted); margin-left: auto; }
+.module-hero-title { font-family: var(--sans); font-weight: 700; font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.018em; line-height: 1.1; color: var(--navy); margin-bottom: 14px; }
+.module-hero-desc { font-family: var(--reading); font-size: 17px; color: var(--ink-soft); line-height: 1.55; max-width: 64ch; }
+.controls { display: grid; grid-template-columns: 1fr; gap: 22px; padding: 22px; background: var(--bg-tint); border: 1px solid var(--rule-faint); margin: 28px 0; }
+@media (min-width: 760px) { .controls.has-2 { grid-template-columns: 1fr 1fr; } }
+.control-label { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-muted); margin-bottom: 10px; display: block; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 0; }
+.chip { font-family: var(--sans); font-size: 12.5px; font-weight: 500; background: white; border: 1px solid var(--rule-soft); border-right-width: 0; color: var(--ink-soft); padding: 9px 14px; cursor: pointer; white-space: nowrap; }
+.chip:last-child { border-right-width: 1px; }
+.chip[aria-pressed="true"] { background: var(--navy); color: white; border-color: var(--navy); }
+.chip[aria-pressed="true"] + .chip { border-left-color: var(--navy); }
+.legend { display: flex; gap: 16px; align-items: center; margin: 0 0 28px 0; padding: 12px 18px; background: var(--bg-tint); border-left: 3px solid var(--navy); flex-wrap: wrap; font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); }
+.legend-label { font-weight: 600; color: var(--navy); }
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-tag { font-family: var(--sans); font-size: 10.5px; font-weight: 500; color: white; padding: 3px 9px; border-radius: 999px; }
+.legend-tag.tag-anat { background: var(--terra-text); }
+.legend-tag.tag-phys { background: var(--teal-text); }
+.module-tools { margin-bottom: 28px; }
+.module-tools-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-faint); flex-wrap: wrap; }
+.module-tools-title { font-family: var(--sans); font-weight: 700; font-size: 16px; color: var(--navy); }
+.module-tools-sub { font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--ink-muted); }
+.module-tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.module-tool { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; background: white; border: 1px solid var(--rule-faint); text-decoration: none; color: var(--ink); transition: all 0.16s var(--ease); }
+.module-tool:hover { border-color: var(--navy); box-shadow: var(--shadow-card); transform: translateY(-1px); }
+.module-tool-tag-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.module-tool-title { font-family: var(--sans); font-size: 14px; font-weight: 600; line-height: 1.3; }
+.module-tool-meta { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); }
+.topics-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap; }
+.topics-head-title { font-family: var(--sans); font-weight: 700; font-size: 18px; color: var(--navy); }
+.topics-head-sub { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-muted); }
+.shutter-list { display: flex; flex-direction: column; gap: 10px; }
+.shutter { background: white; border: 1px solid var(--rule-soft); overflow: hidden; transition: all 0.2s var(--ease); }
+.shutter:hover { border-color: var(--rule); }
+.shutter[data-open="true"] { border-color: var(--navy); box-shadow: var(--shadow-lift); }
+.shutter-trigger-row { display: grid; grid-template-columns: 36px 1fr auto; gap: 16px; align-items: center; background: white; padding: 16px 22px; transition: background 0.2s var(--ease); }
+.shutter[data-open="true"] .shutter-trigger-row { background: var(--navy); color: white; }
+.shutter-title-block { min-width: 0; }
+.shutter-title { font-family: var(--sans); font-weight: 700; font-size: 17.5px; color: var(--ink); line-height: 1.25; margin-bottom: 3px; }
+.shutter[data-open="true"] .shutter-title { color: white; }
+.shutter-sub { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+.shutter[data-open="true"] .shutter-sub { color: var(--gold-bright); }
+.shutter-circles { display: flex; gap: 8px; flex-shrink: 0; }
+.circle-btn { width: 48px; height: 48px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--sans); color: white; padding: 0; transition: all 0.18s var(--ease); flex-shrink: 0; }
+.circle-btn[data-circle="required"] { background: var(--terra-text); }
+.circle-btn[data-circle="recommended"] { background: var(--gold-text); }
+.circle-btn[data-circle="optional"] { background: var(--navy-mid); }
+.circle-btn[data-circle="refresher"] { background: var(--teal-text); }
+.circle-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.circle-btn[aria-pressed="true"] { border-color: var(--gold-bright); box-shadow: 0 0 0 3px white, 0 0 0 5px var(--gold-bright), var(--shadow-card); }
+.shutter[data-open="true"] .circle-btn[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--navy), 0 0 0 5px var(--gold-bright), var(--shadow-card); }
+.circle-letter { font-size: 17px; font-weight: 700; line-height: 1; }
+.circle-count { font-family: var(--sans); font-size: 10px; font-weight: 600; margin-top: 2px; opacity: 0.85; line-height: 1; }
+.shutter-body { display: none; padding: 26px 24px 28px; background: white; border-top: 1px solid var(--rule-faint); }
+.shutter[data-open="true"] .shutter-body { display: block; }
+.section-region { padding-left: 16px; border-left: 4px solid var(--rule-soft); }
+.section-region.region-required { border-left-color: var(--terra-text); }
+.section-region.region-recommended { border-left-color: var(--gold-text); }
+.section-region.region-optional { border-left-color: var(--navy-mid); }
+.section-region.region-refresher { border-left-color: var(--teal-text); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--rule-faint); flex-wrap: wrap; }
+.section-name { font-family: var(--sans); font-size: 18px; font-weight: 700; line-height: 1.2; }
+.section-region.region-required .section-name { color: var(--terra-text); }
+.section-region.region-recommended .section-name { color: var(--gold-text); }
+.section-region.region-optional .section-name { color: var(--navy); }
+.section-region.region-refresher .section-name { color: var(--teal-text); }
+.section-helper { font-family: var(--reading); font-size: 14px; color: var(--ink-soft); font-style: italic; margin-left: auto; }
+.section-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.res { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; background: white; border: 1px solid var(--rule-faint); text-decoration: none; color: var(--ink); transition: all 0.18s var(--ease); }
+.res:hover { border-color: var(--navy); box-shadow: var(--shadow-card); transform: translateY(-1px); }
+.res-tag-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.res-tag { font-family: var(--sans); font-size: 10.5px; font-weight: 500; color: white; padding: 3px 9px; border-radius: 999px; }
+.res-tag.tag-reading, .res-tag.tag-video, .res-tag.tag-notes, .res-tag.tag-atlas, .res-tag.tag-tool, .res-tag.tag-worksheet, .res-tag.tag-quiz, .res-tag.tag-practice { background: var(--ink-muted); }
+.res-tag.tag-lab { background: var(--terra-text); }
+.res-tag.tag-case { background: var(--teal-text); }
+.res-tag.tag-aitool { background: var(--gold-text); }
+.res-tag.tag-kahoot { background: var(--plum-text); }
+.res-tag.tag-assignment { background: var(--slate-text); }
+.res-tag.tag-admin { background: var(--admin-text); }
+.res-tag.tag-anat { background: var(--terra-text); }
+.res-tag.tag-phys { background: var(--teal-text); }
+.dok-badge { font-family: var(--sans); font-size: 10px; font-weight: 600; color: var(--navy); padding: 2px 8px; border: 1px solid var(--navy); border-radius: 999px; background: white; }
+.res-title { font-family: var(--sans); font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.res-meta { font-family: var(--sans); font-size: 11.5px; color: var(--ink-muted); }
+.res-arrow { font-family: var(--sans); font-size: 12.5px; font-weight: 600; color: var(--terra-text); margin-top: 2px; }
+.res:hover .res-arrow { color: var(--navy); }
+.circle-legend { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; padding: 14px 18px; background: var(--bg-tint); border-left: 3px solid var(--gold-text); margin-bottom: 18px; font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); }
+.circle-legend-label { font-weight: 600; color: var(--navy); }
+.circle-legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.circle-legend-dot { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--sans); font-weight: 700; font-size: 11px; color: white; flex-shrink: 0; }
+.circle-legend-dot[data-circle="required"] { background: var(--terra-text); }
+.circle-legend-dot[data-circle="recommended"] { background: var(--gold-text); }
+.circle-legend-dot[data-circle="optional"] { background: var(--navy-mid); }
+.circle-legend-dot[data-circle="refresher"] { background: var(--teal-text); }
+@media (max-width: 720px) {
+  .app { padding: 22px 22px 64px; }
+  .shutter-trigger-row { grid-template-columns: 28px 1fr; gap: 12px; padding: 14px 16px; }
+  .shutter-circles { grid-column: 2; margin-top: 10px; justify-content: flex-start; }
+  .picker-grid { grid-template-columns: 1fr; }
+  .toolkit-grid { grid-template-columns: 1fr; }
+}
+`;
+
+function formatDOK(d) {
+  if (!d) return '';
+  const s = String(d).replace(/\s/g, '');
+  if (s === '1-4' || s.toLowerCase() === 'all') return 'DOK 1-4';
+  if (s.includes(',')) return 'DOK ' + s.split(',').join('/');
+  return 'DOK ' + s;
+}
+
+function autoModuleTools(modName) {
+  return [
+    { title: `${modName} Kahoot`,        type: 'kahoot',   meta: '', dok: '1,2', url: '#' },
+    { title: `${modName} DOK Practice`,  type: 'practice', meta: 'Pick your level', dok: '1-4', url: '#' },
+    { title: `${modName} AI Tutor`,      type: 'aitool',   meta: 'Conversational', url: '#' },
+    { title: `${modName} Lab Activity`,  type: 'lab',      meta: 'In-lab', url: '#' }
+  ];
+}
+
+function buildHubData() {
+  const c = state.course;
+  const sections = sectionsFor(c.type);
+  const showAP = showsAPFilter(c.type);
+  const typeLabel = c.type === 'anatomy' ? 'Anatomy course' :
+                    c.type === 'physiology' ? 'Physiology course' :
+                    'Anatomy + Physiology';
+  // Filter modules: only include modules with at least one topic that has at least one resource
+  const cleanModules = state.modules
+    .filter(m => m.topics.some(t => sections.some(s => (t.resources[s] || []).length > 0)))
+    .map(m => ({
+      ...m,
+      tools: autoModuleTools(`Module ${m.num}`),
+      topics: m.topics.filter(t => sections.some(s => (t.resources[s] || []).length > 0))
+    }));
+  return {
+    type: c.type, typeLabel,
+    organization: c.organization,
+    unitLabel: c.organization === 'weeks' ? 'Week' : 'Module',
+    unitLabelPlural: c.organization === 'weeks' ? 'Weeks' : 'Modules',
+    code: c.code, term: c.term,
+    title: c.title, subtitle: c.subtitle,
+    sections, showAPFilter: showAP, showLegend: showAP,
+    toolkit: state.toolkit,
+    modules: cleanModules
+  };
+}
+
+function buildHubBodyHTML(hub) {
+  const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  const escapeAttr = escapeHTML;
+
+  // Empty state
+  if (hub.modules.length === 0 && hub.toolkit.length === 0) {
+    return `<div class="app">
+      <div style="padding:80px 20px;text-align:center;color:var(--ink-muted);font-family:var(--reading);font-size:16px;max-width:600px;margin:0 auto;">
+        Add some toolkit resources or modules with topics in the Edit tab.
+      </div>
+    </div>`;
+  }
+
+  // Group toolkit by category
   const grouped = {};
-  c.toolkit.forEach(t => {
+  hub.toolkit.forEach(t => {
     const cat = t.cat || 'ai';
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(t);
   });
 
-  const renderCard = (t) => {
-    const tagClass = TYPE_TAG_CLASS[t.type] || 'tag-tool';
-    const tagLabel = TYPE_LABELS[t.type] || t.type;
+  const TKMETA = {
+    ai: { label: 'AI Tools', sub: 'AI tutors and conversational study aids' },
+    practice: { label: 'Practice', sub: 'DOK generators and practice worksheets' },
+    games: { label: 'Games', sub: 'Kahoots and game-based review' },
+    admin: { label: 'Admin', sub: 'Syllabus, schedules, policies' }
+  };
+  const TYPE_LABELS_HUB = TYPE_LABELS;
+
+  const tkCard = (t) => {
+    const tagLabel = TYPE_LABELS_HUB[t.type] || t.type;
     const dokHTML = t.dok ? `<span class="dok-badge">${formatDOK(t.dok)}</span>` : '';
-    return `
-      <a class="toolkit-card" href="#" target="_top" aria-label="${escapeAttr(t.title)}, ${tagLabel}">
-        <div class="toolkit-card-tag-row">
-          <span class="res-tag ${tagClass}">${tagLabel}</span>
-          ${dokHTML}
-        </div>
-        <span class="toolkit-card-title">${escapeHTML(t.title)}</span>
-        <span class="toolkit-card-desc">${escapeHTML(t.desc)}</span>
-        ${t.meta ? `<span class="toolkit-card-meta">${escapeHTML(t.meta)}</span>` : ''}
-      </a>
-    `;
+    return `<a class="toolkit-card" href="${escapeAttr(t.url)}" target="_blank" rel="noopener" aria-label="${escapeAttr(t.title)}, ${tagLabel}">
+      <div class="toolkit-card-tag-row">
+        <span class="res-tag tag-${t.type}">${tagLabel}</span>
+        ${dokHTML}
+      </div>
+      <span class="toolkit-card-title">${escapeHTML(t.title)}</span>
+      ${t.desc ? `<span class="toolkit-card-desc">${escapeHTML(t.desc)}</span>` : ''}
+      ${t.meta ? `<span class="toolkit-card-meta">${escapeHTML(t.meta)}</span>` : ''}
+    </a>`;
   };
 
-  // Render one shutter per category, in TOOLKIT_CATS order, only if it has items
-  const shuttersHTML = Object.keys(TOOLKIT_CATS)
-    .filter(catKey => grouped[catKey] && grouped[catKey].length > 0)
-    .map(catKey => {
-      const meta = TOOLKIT_CATS[catKey];
-      const items = grouped[catKey];
-      const isOpen = state.openToolkitCats.has(catKey);
-      const bodyHTML = isOpen
-        ? `<div class="toolkit-grid">${items.map(renderCard).join('')}</div>`
-        : '';
-      return `
-        <article class="toolkit-shutter" data-open="${isOpen}" data-tk-cat="${catKey}">
-          <button class="toolkit-shutter-trigger" type="button"
-                  aria-expanded="${isOpen}"
-                  aria-controls="tk-body-${catKey}"
-                  data-tk-toggle="${catKey}">
-            <span class="louvers" aria-hidden="true">
-              <span class="louver"></span>
-              <span class="louver"></span>
-              <span class="louver"></span>
-            </span>
-            <span class="toolkit-shutter-name-block">
-              <span class="toolkit-shutter-name">${escapeHTML(meta.label)}</span>
-              <span class="toolkit-shutter-sub">${escapeHTML(meta.sub)}</span>
-            </span>
-            <span class="toolkit-shutter-count">${items.length} ${items.length === 1 ? 'item' : 'items'}</span>
-            <svg class="toolkit-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-              <polyline points="3,6 8,11 13,6"></polyline>
-            </svg>
-          </button>
-          <div class="toolkit-shutter-body" id="tk-body-${catKey}">${bodyHTML}</div>
-        </article>
-      `;
+  const toolkitShutters = Object.keys(TKMETA)
+    .filter(k => grouped[k] && grouped[k].length > 0)
+    .map(k => {
+      const m = TKMETA[k];
+      const items = grouped[k];
+      return `<article class="toolkit-shutter" data-tk-cat="${k}" data-open="false">
+        <button class="toolkit-shutter-trigger" type="button" aria-expanded="false" data-tk-toggle="${k}">
+          <span class="louvers" aria-hidden="true"><span class="louver"></span><span class="louver"></span><span class="louver"></span></span>
+          <span><span class="toolkit-shutter-name">${escapeHTML(m.label)}</span><span class="toolkit-shutter-sub" style="display:block">${escapeHTML(m.sub)}</span></span>
+          <span class="toolkit-shutter-count">${items.length} ${items.length === 1 ? 'item' : 'items'}</span>
+          <svg class="toolkit-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="3,6 8,11 13,6"></polyline></svg>
+        </button>
+        <div class="toolkit-shutter-body"><div class="toolkit-grid">${items.map(tkCard).join('')}</div></div>
+      </article>`;
     }).join('');
 
-  host.innerHTML = `
+  const toolkitSection = hub.toolkit.length > 0 ? `
     <section class="toolkit" aria-labelledby="toolkit-title">
       <header class="toolkit-head">
         <h2 class="toolkit-head-title" id="toolkit-title">Course toolkit</h2>
-        <span class="toolkit-head-sub">${c.toolkit.length} ${c.toolkit.length === 1 ? 'resource' : 'resources'} you'll use all term</span>
+        <span class="toolkit-head-sub">${hub.toolkit.length} ${hub.toolkit.length === 1 ? 'resource' : 'resources'} you'll use all term</span>
       </header>
-      <div class="toolkit-shutter-list">${shuttersHTML}</div>
+      <div class="toolkit-shutter-list">${toolkitShutters}</div>
     </section>
-  `;
+  ` : '';
 
-  // Attach toggle handlers
-  host.querySelectorAll('[data-tk-toggle]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const catKey = btn.dataset.tkToggle;
-      const shutter = btn.closest('.toolkit-shutter');
-      const bodyHost = shutter.querySelector('.toolkit-shutter-body');
-
-      if (state.openToolkitCats.has(catKey)) {
-        state.openToolkitCats.delete(catKey);
-        shutter.dataset.open = 'false';
-        btn.setAttribute('aria-expanded', 'false');
-        bodyHost.innerHTML = '';
-      } else {
-        state.openToolkitCats.add(catKey);
-        shutter.dataset.open = 'true';
-        btn.setAttribute('aria-expanded', 'true');
-        const items = grouped[catKey];
-        bodyHost.innerHTML = `<div class="toolkit-grid">${items.map(renderCard).join('')}</div>`;
-      }
-    });
-  });
-}
-
-function renderPicker() {
-  const c = COURSES[state.course];
-  const grid = document.getElementById('picker-grid');
-  document.getElementById('picker-sub').textContent = `${c.modules.length} ${c.modules.length === 1 ? 'module' : 'modules'} · choose one to see its topics`;
-
-  grid.innerHTML = c.modules.map(mod => {
-    const topicCount = mod.topics.length;
-    return `
-      <button class="picker-card" type="button" data-pick-module="${mod.id}" aria-label="Module ${mod.num}, ${escapeAttr(mod.name)}, ${topicCount} topics">
-        <div class="picker-card-num-row">
-          <span class="picker-card-num">${escapeHTML(mod.num)}</span>
-          <span class="picker-card-meta">${escapeHTML(mod.meta)}</span>
-        </div>
-        <h3 class="picker-card-title">${escapeHTML(mod.name)}</h3>
-        <p class="picker-card-desc">${escapeHTML(mod.desc || '')}</p>
-        <div class="picker-card-foot">
-          <span class="picker-card-count">${topicCount} ${topicCount === 1 ? 'topic' : 'topics'}</span>
-          <span class="picker-card-arrow" aria-hidden="true">Open <span>→</span></span>
-        </div>
-      </button>
-    `;
-  }).join('');
-
-  grid.querySelectorAll('[data-pick-module]').forEach(btn => {
-    btn.addEventListener('click', () => goModule(btn.dataset.pickModule));
-  });
-}
-
-// ============================================
-// MODULE RENDER
-// ============================================
-function renderModule() {
-  const c = COURSES[state.course];
-  const mod = c.modules.find(m => m.id === state.activeModuleId);
-  if (!mod) { goHub(); return; }
-
-  document.getElementById('breadcrumb-current').textContent = `Module ${mod.num}: ${mod.name}`;
-  document.getElementById('mod-hero-num').textContent = mod.num;
-  document.getElementById('mod-hero-meta').textContent = mod.meta;
-  document.getElementById('mod-hero-title').textContent = mod.name;
-  document.getElementById('mod-hero-desc').textContent = mod.desc || '';
-
-  // Show refresher legend item only for Physiology
-  const refresherLegend = document.getElementById('circle-legend-refresher');
-  if (c.sections.includes('refresher')) refresherLegend.removeAttribute('hidden');
-  else refresherLegend.setAttribute('hidden', '');
-
-  renderControls();
-  renderLegend();
-  renderModuleTools(mod);
-  renderTopics(mod);
-}
-
-function renderControls() {
-  const c = COURSES[state.course];
-  const wrap = document.getElementById('controls');
-  const showAP = c.showAPFilter;
-  wrap.classList.remove('has-1', 'has-2');
-  wrap.classList.add(showAP ? 'has-2' : 'has-1');
-
-  let html = `
-    <div class="control-group">
-      <label class="control-label" id="lbl-org">Organize topics by</label>
-      <div class="chip-row" role="group" aria-labelledby="lbl-org">
-        <button class="chip" data-org="system" aria-pressed="${state.organization==='system'}">Body system</button>
-        <button class="chip" data-org="region" aria-pressed="${state.organization==='region'}">Region</button>
+  // Module picker
+  const pickerSection = hub.modules.length > 0 ? `
+    <section class="picker-section" aria-labelledby="picker-title">
+      <header class="picker-head">
+        <h2 class="picker-head-title" id="picker-title">${escapeHTML(hub.unitLabelPlural)}</h2>
+        <span class="picker-head-sub">${hub.modules.length} ${hub.modules.length === 1 ? hub.unitLabel.toLowerCase() : hub.unitLabelPlural.toLowerCase()} · choose one to see its topics</span>
+      </header>
+      <div class="picker-grid">
+        ${hub.modules.map(m => {
+          const tc = m.topics.length;
+          return `<button class="picker-card" type="button" data-pick-module="${m.id}" aria-label="${escapeAttr(hub.unitLabel)} ${m.num}, ${escapeAttr(m.name)}">
+            <div class="picker-card-num-row"><span class="picker-card-num">${escapeHTML(m.num)}</span><span class="picker-card-meta">${escapeHTML(m.meta || '')}</span></div>
+            <h3 class="picker-card-title">${escapeHTML(m.name)}</h3>
+            ${m.desc ? `<p class="picker-card-desc">${escapeHTML(m.desc)}</p>` : ''}
+            <div class="picker-card-foot"><span class="picker-card-count">${tc} ${tc === 1 ? 'topic' : 'topics'}</span><span class="picker-card-arrow">Open <span>→</span></span></div>
+          </button>`;
+        }).join('')}
       </div>
+    </section>
+  ` : '';
+
+  const eyebrowParts = [];
+  if (hub.code) eyebrowParts.push(escapeHTML(hub.code));
+  if (hub.term) eyebrowParts.push(escapeHTML(hub.term));
+  const heroEyebrow = eyebrowParts.length ? `<span class="hero-meta">${eyebrowParts.join(' · ')}</span>` : '';
+
+  // Render modules data for runtime navigation (embedded as JSON)
+  const modulesData = hub.modules.map(m => ({
+    id: m.id, num: m.num, name: m.name, meta: m.meta, desc: m.desc,
+    tools: m.tools,
+    topics: m.topics.map(t => ({
+      id: t.id, name: t.name, sub: t.sub, kind: t.kind,
+      resources: hub.sections.reduce((acc, sec) => {
+        acc[sec] = (t.resources[sec] || []).map(r => ({ ...r }));
+        return acc;
+      }, {})
+    }))
+  }));
+
+  return `
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">${escapeHTML(hub.title || 'Course')}<em></em></span>
     </div>
-  `;
-  if (showAP) {
-    html += `
-      <div class="control-group">
-        <label class="control-label" id="lbl-ap">Show resources for</label>
-        <div class="chip-row" role="group" aria-labelledby="lbl-ap">
-          <button class="chip" data-ap="both" aria-pressed="${state.apFilter==='both'}">Both</button>
-          <button class="chip" data-ap="anatomy" aria-pressed="${state.apFilter==='anatomy'}">Anatomy only</button>
-          <button class="chip" data-ap="physiology" aria-pressed="${state.apFilter==='physiology'}">Physiology only</button>
+  </header>
+  <main id="main">
+    <div class="view active" id="view-hub">
+      <section class="hero">
+        <div class="hero-pills">
+          <span class="hero-type-pill" data-type="${escapeAttr(hub.type)}">${escapeHTML(hub.typeLabel)}</span>
+          ${heroEyebrow}
+        </div>
+        <h1 class="hero-title">${hub.title ? escapeHTML(hub.title) : 'Untitled course'}</h1>
+        ${hub.subtitle ? `<p class="hero-subtitle">${escapeHTML(hub.subtitle)}</p>` : ''}
+      </section>
+      ${toolkitSection}
+      ${pickerSection}
+    </div>
+    <div class="view" id="view-module">
+      <nav class="breadcrumb"><button type="button" id="bc-back">← Back to all ${hub.unitLabelPlural.toLowerCase()}</button> <span class="breadcrumb-sep">/</span> <span class="breadcrumb-current" id="bc-current"></span></nav>
+      <header class="module-hero">
+        <div class="module-hero-num-row"><span class="module-hero-num" id="mh-num"></span><span class="module-hero-meta" id="mh-meta"></span></div>
+        <h1 class="module-hero-title" id="mh-title"></h1>
+        <p class="module-hero-desc" id="mh-desc"></p>
+      </header>
+      ${hub.showAPFilter ? `
+      <div class="controls has-2">
+        <div><span class="control-label">Show resources for</span>
+          <div class="chip-row" id="ap-chips">
+            <button class="chip" data-ap="both" aria-pressed="true">Both</button>
+            <button class="chip" data-ap="anatomy" aria-pressed="false">Anatomy only</button>
+            <button class="chip" data-ap="physiology" aria-pressed="false">Physiology only</button>
+          </div>
         </div>
       </div>
-    `;
-  }
-  wrap.innerHTML = html;
-
-  wrap.querySelectorAll('[data-org]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.organization = btn.dataset.org;
-      const c = COURSES[state.course];
-      const mod = c.modules.find(m => m.id === state.activeModuleId);
-      renderTopics(mod);
-      wrap.querySelectorAll('[data-org]').forEach(b =>
-        b.setAttribute('aria-pressed', b.dataset.org === state.organization));
-    });
-  });
-  wrap.querySelectorAll('[data-ap]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.apFilter = btn.dataset.ap;
-      const c = COURSES[state.course];
-      const mod = c.modules.find(m => m.id === state.activeModuleId);
-      renderTopics(mod);
-      wrap.querySelectorAll('[data-ap]').forEach(b =>
-        b.setAttribute('aria-pressed', b.dataset.ap === state.apFilter));
-    });
-  });
-}
-
-function renderLegend() {
-  const c = COURSES[state.course];
-  const host = document.getElementById('legend-host');
-  if (!c.showLegend) { host.innerHTML = ''; return; }
-  host.innerHTML = `
-    <div class="legend">
-      <span class="legend-label">Resources are tagged by content:</span>
-      <span class="legend-item"><span class="legend-tag tag-anat">Anat</span>Anatomy</span>
-      <span class="legend-item"><span class="legend-tag tag-phys">Phys</span>Physiology</span>
+      ` : ''}
+      ${hub.showLegend ? `
+      <div class="legend"><span class="legend-label">Resources tagged by content:</span>
+        <span class="legend-item"><span class="legend-tag tag-anat">Anat</span>Anatomy</span>
+        <span class="legend-item"><span class="legend-tag tag-phys">Phys</span>Physiology</span>
+      </div>
+      ` : ''}
+      <div id="mod-tools-host"></div>
+      <header class="topics-head"><h2 class="topics-head-title">Topics in this ${escapeHTML(hub.unitLabel.toLowerCase())}</h2><span class="topics-head-sub">Click any colored circle to see those resources</span></header>
+      <div class="circle-legend"><span class="circle-legend-label">Circle key:</span>
+        ${hub.sections.map(s => {
+          const lookup = { required:'R', recommended:'H', optional:'O', refresher:'A' };
+          const labelMap = { required:'Required', recommended:'Highly recommended', optional:'Optional', refresher:'Anatomy refresher' };
+          return `<span class="circle-legend-item"><span class="circle-legend-dot" data-circle="${s}">${lookup[s]}</span>${labelMap[s]}</span>`;
+        }).join('')}
+      </div>
+      <div class="shutter-list" id="topics-list"></div>
     </div>
-  `;
-}
-
-function renderModuleTools(mod) {
-  const host = document.getElementById('module-tools-host');
-  if (!mod.tools || mod.tools.length === 0) { host.innerHTML = ''; return; }
-  const tools = mod.tools.map(t => {
-    const tagClass = TYPE_TAG_CLASS[t.type] || 'tag-tool';
-    const tagLabel = TYPE_LABELS[t.type] || t.type;
-    const dokHTML = t.dok ? `<span class="dok-badge">${formatDOK(t.dok)}</span>` : '';
-    return `
-      <a class="module-tool" href="#" target="_top" aria-label="${escapeAttr(t.title)}, ${tagLabel}${t.meta ? ', ' + t.meta : ''}">
-        <div class="module-tool-tag-row">
-          <span class="res-tag ${tagClass}">${tagLabel}</span>
-          ${dokHTML}
-        </div>
-        <span class="module-tool-title">${escapeHTML(t.title)}</span>
-        ${t.meta ? `<span class="module-tool-meta">${escapeHTML(t.meta)}</span>` : ''}
-      </a>
-    `;
-  }).join('');
-  host.innerHTML = `
-    <section class="module-tools" aria-labelledby="module-tools-title">
-      <header class="module-tools-head">
-        <h2 class="module-tools-title" id="module-tools-title">Module tools</h2>
-        <span class="module-tools-sub">Module-wide resources for this unit</span>
-      </header>
-      <div class="module-tools-grid">${tools}</div>
-    </section>
-  `;
-}
-
-function filterTopicsByOrg(topics) {
-  return topics.filter(t => t.kind.includes(state.organization));
-}
-function filterResourcesByAP(resources) {
-  if (state.apFilter === 'both') return resources;
-  return resources.filter(r => r.apType === state.apFilter);
-}
-
-function renderTopics(mod) {
-  const c = COURSES[state.course];
+  </main>
+</div>
+<script>
+const HUB_DATA = ${JSON.stringify({ sections: hub.sections, showAPFilter: hub.showAPFilter, unitLabel: hub.unitLabel, unitLabelPlural: hub.unitLabelPlural, modules: modulesData })};
+const TYPE_LABELS_HUB = ${JSON.stringify(TYPE_LABELS)};
+const SECTION_META_HUB = { required:{letter:'R',label:'Required',helper:'Do these to pass'}, recommended:{letter:'H',label:'Highly recommended',helper:'Do these to thrive'}, optional:{letter:'O',label:'Optional',helper:'Go deeper if curious'}, refresher:{letter:'A',label:'Anatomy refresher',helper:'Remedial structural review'} };
+const escH = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+function fmtDOK(d) { if (!d) return ''; const s = String(d).replace(/\\s/g,''); if (s==='1-4'||s.toLowerCase()==='all') return 'DOK 1-4'; if (s.includes(',')) return 'DOK '+s.split(',').join('/'); return 'DOK '+s; }
+const hubState = { activeMod: null, apFilter: 'both', activeSec: {} };
+function filterAP(list) { if (!HUB_DATA.showAPFilter || hubState.apFilter==='both') return list; return list.filter(r => r.apType === hubState.apFilter); }
+function go(view) { document.getElementById('view-hub').classList.toggle('active', view==='hub'); document.getElementById('view-module').classList.toggle('active', view==='module'); window.scrollTo({top:0,behavior:'smooth'}); }
+document.querySelectorAll('[data-pick-module]').forEach(b => b.addEventListener('click', () => { hubState.activeMod = b.dataset.pickModule; hubState.activeSec = {}; renderModView(); go('module'); }));
+document.getElementById('bc-back').addEventListener('click', () => { hubState.activeMod = null; go('hub'); });
+document.querySelectorAll('[data-tk-toggle]').forEach(b => b.addEventListener('click', () => {
+  const sh = b.closest('.toolkit-shutter');
+  const open = sh.dataset.open === 'true';
+  sh.dataset.open = open ? 'false' : 'true';
+  b.setAttribute('aria-expanded', open ? 'false' : 'true');
+}));
+document.querySelectorAll('[data-ap]').forEach(b => b.addEventListener('click', () => { hubState.apFilter = b.dataset.ap; document.querySelectorAll('[data-ap]').forEach(x => x.setAttribute('aria-pressed', x===b ? 'true':'false')); renderModView(); }));
+function renderModView() {
+  const m = HUB_DATA.modules.find(x => x.id === hubState.activeMod); if (!m) return;
+  document.getElementById('bc-current').textContent = HUB_DATA.unitLabel + ' ' + m.num + ': ' + m.name;
+  document.getElementById('mh-num').textContent = m.num;
+  document.getElementById('mh-meta').textContent = m.meta || '';
+  document.getElementById('mh-title').textContent = m.name;
+  document.getElementById('mh-desc').textContent = m.desc || '';
+  // Module tools
+  const mtHost = document.getElementById('mod-tools-host');
+  if (m.tools && m.tools.length) {
+    const toolsHTML = m.tools.map(t => {
+      const lbl = TYPE_LABELS_HUB[t.type] || t.type;
+      const dok = t.dok ? '<span class="dok-badge">' + fmtDOK(t.dok) + '</span>' : '';
+      return '<a class="module-tool" href="' + escH(t.url || '#') + '" target="_blank" rel="noopener"><div class="module-tool-tag-row"><span class="res-tag tag-' + t.type + '">' + lbl + '</span>' + dok + '</div><span class="module-tool-title">' + escH(t.title) + '</span>' + (t.meta ? '<span class="module-tool-meta">' + escH(t.meta) + '</span>' : '') + '</a>';
+    }).join('');
+    mtHost.innerHTML = '<section class="module-tools"><header class="module-tools-head"><h2 class="module-tools-title">' + HUB_DATA.unitLabel + ' tools</h2><span class="module-tools-sub">' + HUB_DATA.unitLabel + '-wide resources for this ' + HUB_DATA.unitLabel.toLowerCase() + '</span></header><div class="module-tools-grid">' + toolsHTML + '</div></section>';
+  } else mtHost.innerHTML = '';
+  // Topics
   const list = document.getElementById('topics-list');
-  const visibleTopics = filterTopicsByOrg(mod.topics);
-
-  if (visibleTopics.length === 0) {
-    list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--ink-muted);font-family:var(--reading);font-size:16px;">No topics match the current filters.</div>`;
-    return;
-  }
-
-  list.innerHTML = visibleTopics.map(topic => renderTopicShutter(topic, c)).join('');
-  attachShutterHandlers();
-}
-
-function renderTopicShutter(topic, course) {
-  const activeSection = state.activeSection[topic.id] || null;
-  const isOpen = !!activeSection;
-
-  // Compute counts per section, applying AP filter when relevant
-  const counts = {};
-  course.sections.forEach(sec => {
-    const list = topic.resources[sec] || [];
-    const filtered = course.showAPFilter ? filterResourcesByAP(list) : list;
-    counts[sec] = filtered.length;
-  });
-
-  // Build the circle buttons
-  const circlesHTML = course.sections.map(sec => {
-    const meta = SECTION_META[sec];
-    const isActive = activeSection === sec;
-    return `
-      <button class="circle-btn" type="button"
-              data-circle="${sec}"
-              data-shutter-circle="${topic.id}|${sec}"
-              aria-pressed="${isActive}"
-              aria-label="${counts[sec]} ${meta.label} ${counts[sec] === 1 ? 'resource' : 'resources'} for ${escapeAttr(topic.name)}">
-        <span class="circle-letter" aria-hidden="true">${meta.letter}</span>
-        <span class="circle-count" aria-hidden="true">${counts[sec]}</span>
-      </button>
-    `;
+  list.innerHTML = m.topics.map(t => {
+    const counts = {};
+    HUB_DATA.sections.forEach(s => { counts[s] = filterAP(t.resources[s] || []).length; });
+    const visibleSections = HUB_DATA.sections.filter(s => counts[s] > 0);
+    if (visibleSections.length === 0) return '';
+    const circles = visibleSections.map(s => { const meta = SECTION_META_HUB[s]; return '<button class="circle-btn" type="button" data-circle="' + s + '" data-tcid="' + t.id + '|' + s + '" aria-pressed="false" aria-label="' + counts[s] + ' ' + meta.label + ' resources"><span class="circle-letter">' + meta.letter + '</span><span class="circle-count">' + counts[s] + '</span></button>'; }).join('');
+    return '<article class="shutter" data-shutter-id="' + t.id + '" data-open="false"><div class="shutter-trigger-row"><span class="louvers"><span class="louver"></span><span class="louver"></span><span class="louver"></span></span><div class="shutter-title-block"><span class="shutter-title">' + escH(t.name) + '</span>' + (t.sub ? '<span class="shutter-sub">' + escH(t.sub) + '</span>' : '') + '</div><div class="shutter-circles">' + circles + '</div></div><div class="shutter-body-host" id="' + t.id + '-body"></div></article>';
   }).join('');
+  list.querySelectorAll('[data-tcid]').forEach(b => b.addEventListener('click', () => {
+    const [tid, sec] = b.dataset.tcid.split('|');
+    const sh = list.querySelector('.shutter[data-shutter-id="' + tid + '"]');
+    const host = document.getElementById(tid + '-body');
+    const cur = hubState.activeSec[tid] || null;
+    if (cur === sec) { hubState.activeSec[tid] = null; sh.dataset.open = 'false'; host.innerHTML = ''; sh.querySelectorAll('[data-tcid]').forEach(x => x.setAttribute('aria-pressed','false')); }
+    else {
+      hubState.activeSec[tid] = sec; sh.dataset.open = 'true';
+      const topic = m.topics.find(x => x.id === tid);
+      const meta = SECTION_META_HUB[sec];
+      const list2 = filterAP(topic.resources[sec] || []);
+      const cards = list2.map(r => {
+        const lbl = TYPE_LABELS_HUB[r.type] || r.type;
+        const dok = r.dok ? '<span class="dok-badge">' + fmtDOK(r.dok) + '</span>' : '';
+        const ap = (HUB_DATA.showAPFilter && hubState.apFilter==='both' && r.apType) ? '<span class="res-tag tag-' + (r.apType==='anatomy'?'anat':'phys') + '">' + (r.apType==='anatomy'?'Anat':'Phys') + '</span>' : '';
+        return '<a class="res" href="' + escH(r.url) + '" target="_blank" rel="noopener"><div class="res-tag-row"><span class="res-tag tag-' + r.type + '">' + lbl + '</span>' + dok + ap + '</div><span class="res-title">' + escH(r.title) + '</span>' + (r.meta ? '<span class="res-meta">' + escH(r.meta) + '</span>' : '') + '<span class="res-arrow">View →</span></a>';
+      }).join('');
+      host.innerHTML = '<div class="shutter-body"><div class="section-region region-' + sec + '"><div class="section-head"><h4 class="section-name">' + meta.label + '</h4><span class="section-helper">' + meta.helper + '</span></div><div class="section-cards">' + cards + '</div></div></div>';
+      sh.querySelectorAll('[data-tcid]').forEach(x => { const [, xs] = x.dataset.tcid.split('|'); x.setAttribute('aria-pressed', xs === sec ? 'true' : 'false'); });
+    }
+  }));
+}
+(function () { function send() { try { const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); window.parent && window.parent.postMessage({ type: 'iframe-height', height: h }, '*'); } catch (e) {} } if ('ResizeObserver' in window) new ResizeObserver(send).observe(document.body); window.addEventListener('load', send); window.addEventListener('resize', send); setInterval(send, 1500); })();
+<\/script>
+  `;
+}
 
-  // Build the body if a section is active
-  let bodyHTML = '';
-  if (activeSection) {
-    bodyHTML = renderTopicBody(topic, course, activeSection);
+function generateStandaloneHTML() {
+  const hub = buildHubData();
+  const titleTag = (hub.title || 'Course Hub') + (hub.code ? ' · ' + hub.code : '');
+  const desc = (hub.subtitle || `Course hub for ${hub.title || 'the course'}`).slice(0, 160);
+  const body = buildHubBodyHTML(hub);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="${escapeAttr(desc)}">
+<meta name="theme-color" content="#0A1322">
+<title>${escapeHTML(titleTag)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>${HUB_CSS}</style>
+</head>
+<body>
+${body}
+</body>
+</html>`;
+}
+
+// ============================================
+// PREVIEW
+// ============================================
+function refreshPreview() {
+  const html = generateStandaloneHTML();
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = html;
+}
+
+// Listen for height messages from preview iframe
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'iframe-height') {
+    const frame = document.getElementById('preview-frame');
+    if (frame) frame.style.height = (e.data.height + 24) + 'px';
   }
-
-  return `
-    <article class="shutter" data-shutter-id="${topic.id}" data-open="${isOpen}">
-      <div class="shutter-trigger-row">
-        <span class="louvers" aria-hidden="true">
-          <span class="louver"></span>
-          <span class="louver"></span>
-          <span class="louver"></span>
-        </span>
-        <div class="shutter-title-block">
-          <span class="shutter-title">${escapeHTML(topic.name)}</span>
-          ${topic.sub ? `<span class="shutter-sub">${escapeHTML(topic.sub)}</span>` : ''}
-        </div>
-        <div class="shutter-circles" role="group" aria-label="Sections for ${escapeAttr(topic.name)}">${circlesHTML}</div>
-      </div>
-      <div class="shutter-body-host" id="${topic.id}-body">${bodyHTML}</div>
-    </article>
-  `;
-}
-
-function renderTopicBody(topic, course, section) {
-  const meta = SECTION_META[section];
-  const list = topic.resources[section] || [];
-  const filtered = course.showAPFilter ? filterResourcesByAP(list) : list;
-
-  const cards = filtered.length === 0
-    ? `<div class="section-empty">No ${meta.label.toLowerCase()} resources match the current filter.</div>`
-    : `<div class="section-cards">${filtered.map(r => renderResource(r, course)).join('')}</div>`;
-
-  return `
-    <div class="shutter-body" role="region" aria-label="${meta.label} resources for ${escapeAttr(topic.name)}">
-      <div class="section-region region-${section}">
-        <div class="section-head">
-          <h4 class="section-name">${meta.label}</h4>
-          <span class="section-helper">${meta.helper}</span>
-        </div>
-        ${cards}
-      </div>
-    </div>
-  `;
-}
-
-function renderResource(r, course) {
-  const tagLabel = TYPE_LABELS[r.type] || r.type;
-  const tagClass = TYPE_TAG_CLASS[r.type] || 'tag-tool';
-  const showApTag = course.showAPFilter && state.apFilter === 'both';
-  const apTagClass = r.apType === 'anatomy' ? 'tag-anat' : r.apType === 'physiology' ? 'tag-phys' : '';
-  const apTagLabel = r.apType === 'anatomy' ? 'Anat' : r.apType === 'physiology' ? 'Phys' : '';
-  const dokHTML = r.dok ? `<span class="dok-badge">${formatDOK(r.dok)}</span>` : '';
-  return `
-    <a class="res" href="#" target="_top" aria-label="${escapeAttr(r.title)}, ${tagLabel}${r.dok ? ', ' + formatDOK(r.dok) : ''}${r.time ? ', ' + r.time : ''}">
-      <div class="res-tag-row">
-        <span class="res-tag ${tagClass}">${tagLabel}</span>
-        ${dokHTML}
-        ${showApTag ? `<span class="res-tag ${apTagClass}">${apTagLabel}</span>` : ''}
-      </div>
-      <span class="res-title">${escapeHTML(r.title)}</span>
-      ${r.time ? `<span class="res-meta">${escapeHTML(r.time)}</span>` : ''}
-      <span class="res-arrow" aria-hidden="true">View →</span>
-    </a>
-  `;
-}
-
-function attachShutterHandlers() {
-  document.querySelectorAll('[data-shutter-circle]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const [topicId, sec] = btn.dataset.shutterCircle.split('|');
-      const shutter = document.querySelector(`.shutter[data-shutter-id="${topicId}"]`);
-      const bodyHost = shutter.querySelector(`#${CSS.escape(topicId)}-body`);
-      const currentActive = state.activeSection[topicId] || null;
-
-      if (currentActive === sec) {
-        // Same circle clicked again - close
-        state.activeSection[topicId] = null;
-        shutter.dataset.open = 'false';
-        bodyHost.innerHTML = '';
-        // Update aria-pressed on all circles in this shutter
-        shutter.querySelectorAll('[data-shutter-circle]').forEach(b => b.setAttribute('aria-pressed', 'false'));
-      } else {
-        // Different circle (or first click) - open with this section
-        state.activeSection[topicId] = sec;
-        shutter.dataset.open = 'true';
-        const c = COURSES[state.course];
-        const mod = c.modules.find(m => m.id === state.activeModuleId);
-        const topic = mod.topics.find(t => t.id === topicId);
-        bodyHost.innerHTML = renderTopicBody(topic, c, sec);
-        shutter.querySelectorAll('[data-shutter-circle]').forEach(b => {
-          const [, bSec] = b.dataset.shutterCircle.split('|');
-          b.setAttribute('aria-pressed', bSec === sec ? 'true' : 'false');
-        });
-      }
-    });
-  });
-}
-
-// ============================================
-// COURSE TAB SWITCHING
-// ============================================
-document.querySelectorAll('.course-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    state.course = tab.dataset.course;
-    state.activeModuleId = null;
-    state.activeSection = {};
-    state.openToolkitCats = new Set();
-    if (state.course !== 'ap') state.apFilter = 'both';
-    document.querySelectorAll('.course-tab').forEach(t => {
-      const isActive = t === tab;
-      t.classList.toggle('active', isActive);
-      t.setAttribute('aria-pressed', isActive);
-    });
-    goHub();
-  });
 });
 
-document.getElementById('breadcrumb-back').addEventListener('click', goHub);
+// ============================================
+// EXPORT
+// ============================================
+document.getElementById('btn-download').addEventListener('click', () => {
+  const html = generateStandaloneHTML();
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const slug = (state.course.code || state.course.title || 'course-hub').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'course-hub';
+  a.download = slug + '.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById('export-output').textContent = html.length > 1500 ? html.slice(0, 1500) + '\n\n... (' + html.length.toLocaleString() + ' chars total)' : html;
+});
+
+async function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try { await navigator.clipboard.writeText(text); return true; } catch {}
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch {}
+  document.body.removeChild(ta);
+  return ok;
+}
+
+document.getElementById('btn-copy-html').addEventListener('click', async () => {
+  const html = generateStandaloneHTML();
+  const ok = await copyToClipboard(html);
+  const btn = document.getElementById('btn-copy-html');
+  const orig = btn.textContent;
+  btn.textContent = ok ? '✓ Copied' : 'Copy failed';
+  setTimeout(() => btn.textContent = orig, 1800);
+});
+
+document.getElementById('btn-save-config').addEventListener('click', () => {
+  const config = { course: state.course, toolkit: state.toolkit, modules: state.modules };
+  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const slug = (state.course.code || 'course').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  a.download = slug + '-config.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btn-load-config').addEventListener('click', () => {
+  document.getElementById('config-file-input').click();
+});
+document.getElementById('config-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = (ev) => {
+    try {
+      const cfg = JSON.parse(ev.target.result);
+      state.course = Object.assign({type:'anatomy',organization:'modules',code:'',term:'',title:'',subtitle:'',instructor:'',institution:''}, cfg.course || {});
+      state.toolkit = Array.isArray(cfg.toolkit) ? cfg.toolkit : [];
+      state.modules = Array.isArray(cfg.modules) ? cfg.modules : [];
+      // Populate UI fields
+      ['type','organization','code','term','title','subtitle','instructor','institution'].forEach(k => {
+        const el = document.getElementById('f-' + k);
+        if (el) el.value = state.course[k] || '';
+      });
+      renderBlock03Header();
+      renderToolkitForm();
+      renderToolkitList();
+      renderTKCounts();
+      renderModules();
+      alert('Loaded ' + state.toolkit.length + ' toolkit ' + (state.toolkit.length===1?'item':'items') + ' and ' + state.modules.length + ' ' + (state.modules.length===1?'unit':'units') + '.');
+    } catch {
+      alert('Could not parse JSON.');
+    }
+  };
+  r.readAsText(file);
+});
+
+// ============================================
+// DEMO LOADER
+// ============================================
+document.getElementById('btn-load-demo').addEventListener('click', () => {
+  if ((state.modules.length > 0 || state.toolkit.length > 0) && !confirm('Replace your current configuration with demo content?')) return;
+  state.course = {
+    type: 'anatomy',
+    organization: 'modules',
+    code: 'BIO 004',
+    term: 'Summer 2026',
+    title: 'Human Anatomy',
+    subtitle: 'Eight modules. One body. Pick a module to dive into its topics.',
+    instructor: 'Dr. Sharilyn Rennie',
+    institution: 'Solano Community College'
+  };
+  ['type','organization','code','term','title','subtitle','instructor','institution'].forEach(k => {
+    document.getElementById('f-' + k).value = state.course[k];
+  });
+  state.toolkit = [
+    { id: uid(), cat: 'admin', title: 'Syllabus & Course Calendar', type: 'admin', desc: 'TBL session schedule, lab exam dates, due dates, and policies.', meta: 'Updated June 2026', dok: '', url: 'https://example.com/syllabus' },
+    { id: uid(), cat: 'admin', title: 'Lab Schedule & Safety', type: 'admin', desc: 'Weekly lab activities, dissection schedule, and safety protocols.', meta: '5 lab exams', dok: '', url: 'https://example.com/lab-schedule' },
+    { id: uid(), cat: 'ai', title: 'Course AI Study Buddy', type: 'aitool', desc: 'Chat-based tutor trained on your syllabus and lecture content.', meta: 'Always available', dok: '', url: 'https://example.com/ai-buddy' },
+    { id: uid(), cat: 'practice', title: 'DOK Practice Generator', type: 'practice', desc: 'Generates practice questions at any DOK level (1 through 4).', meta: 'Up to 50 questions', dok: '1-4', url: 'https://example.com/dok-gen' },
+    { id: uid(), cat: 'games', title: 'Master Kahoot Bank', type: 'kahoot', desc: 'Every Kahoot from every module, organized by week.', meta: '24 sets · DOK 1/2', dok: '', url: 'https://example.com/kahoots' }
+  ];
+  state.modules = [
+    {
+      id: uid(), num: '01', name: 'Foundation & Histology', meta: 'Lab Exam 1 prep',
+      desc: 'Anatomical terminology, body cavities, tissue types, and the language anatomists use to describe location.',
+      topics: [
+        {
+          id: uid(), name: 'Body Organization & Terminology', sub: 'Foundation', kind: ['system','region'],
+          resources: {
+            required: [
+              { id: uid(), title: 'Lecture slides: anatomical position', type: 'reading', meta: '20 min read', url: 'https://example.com/r1' },
+              { id: uid(), title: 'Lab manual chapter 1', type: 'lab', meta: 'In lab', url: 'https://example.com/r2' }
+            ],
+            recommended: [
+              { id: uid(), title: 'Module 1 Kahoot', type: 'kahoot', meta: '15 questions', dok: '1,2', url: 'https://example.com/r3' }
+            ],
+            optional: [
+              { id: uid(), title: 'Khan Academy: anatomical terminology', type: 'video', meta: '~30 min', url: 'https://example.com/r4' }
+            ],
+            refresher: []
+          }
+        },
+        {
+          id: uid(), name: 'Histology: Four Tissue Types', sub: 'Tissue level', kind: ['system'],
+          resources: {
+            required: [
+              { id: uid(), title: 'Histology slide atlas', type: 'atlas', meta: 'Self-paced', url: 'https://example.com/r5' }
+            ],
+            recommended: [
+              { id: uid(), title: 'Tissue ID practice quiz', type: 'practice', meta: '20 questions', dok: '2', url: 'https://example.com/r6' }
+            ],
+            optional: [],
+            refresher: []
+          }
+        }
+      ]
+    },
+    {
+      id: uid(), num: '02', name: 'Integumentary & Skeletal', meta: 'Lab Exam 1 prep',
+      desc: 'Skin layers and accessory structures. Bone tissue, axial skeleton, appendicular skeleton, and joint classification.',
+      topics: [
+        {
+          id: uid(), name: 'Skeletal System: Bone Tissue', sub: 'Histology to gross', kind: ['system'],
+          resources: {
+            required: [
+              { id: uid(), title: 'Bone tissue lecture', type: 'reading', meta: '25 min', url: 'https://example.com/r7' },
+              { id: uid(), title: 'Lab: bone identification', type: 'lab', meta: 'In lab', url: 'https://example.com/r8' }
+            ],
+            recommended: [
+              { id: uid(), title: 'Bone matrix concept viewer', type: 'tool', meta: 'Self-paced', url: 'https://example.com/r9' }
+            ],
+            optional: [],
+            refresher: []
+          }
+        }
+      ]
+    }
+  ];
+  state.ui.openModules = new Set();
+  state.ui.openTopics = new Set();
+  renderBlock03Header();
+  renderToolkitForm();
+  renderToolkitList();
+  renderTKCounts();
+  renderModules();
+  alert('Demo content loaded. Switch to Preview to see the rendered hub.');
+});
 
 // ============================================
 // UTILS
@@ -1753,26 +2169,13 @@ function escapeHTML(s) {
 function escapeAttr(s) { return escapeHTML(s); }
 
 // ============================================
-// IFRAME HEIGHT SENDER
-// ============================================
-(function () {
-  const id = 'course-access-prototype';
-  function send() {
-    try {
-      const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-      window.parent && window.parent.postMessage({ type: 'iframe-height', id, height: h }, '*');
-    } catch (e) {}
-  }
-  if ('ResizeObserver' in window) new ResizeObserver(send).observe(document.body);
-  window.addEventListener('load', send);
-  window.addEventListener('resize', send);
-  setInterval(send, 1500);
-})();
-
-// ============================================
 // INIT
 // ============================================
-renderHub();
+renderBlock03Header();
+renderToolkitForm();
+renderToolkitList();
+renderTKCounts();
+renderModules();
 </script>
 </body>
 </html>
